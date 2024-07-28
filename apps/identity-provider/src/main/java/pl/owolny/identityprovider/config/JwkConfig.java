@@ -7,7 +7,6 @@ import org.springframework.context.annotation.Configuration;
 
 import java.security.interfaces.RSAPrivateKey;
 import java.security.interfaces.RSAPublicKey;
-import java.util.UUID;
 
 @Configuration
 public class JwkConfig {
@@ -29,7 +28,6 @@ public class JwkConfig {
     public JWKSet getJwkSet() {
         return new JWKSet(new RSAKey.Builder(getPublicKey())
                 .privateKey(getPrivateKey())
-                .keyID(UUID.randomUUID().toString())
                 .build());
     }
 }

@@ -10,6 +10,8 @@ import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import org.springframework.security.oauth2.core.user.OAuth2User;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.security.web.authentication.SavedRequestAwareAuthenticationSuccessHandler;
+import ua_parser.Client;
+import ua_parser.Parser;
 
 import java.io.IOException;
 import java.util.function.Consumer;
@@ -35,6 +37,13 @@ public final class FederatedIdentityAuthenticationSuccessHandler implements Auth
                 this.oauth2UserHandler.accept(oAuth2User);
             }
         }
+        String ipAddress = request.getHeader("X-Forwarded-For");
+        if (ipAddress == null || ipAddress.isEmpty() || "unknown".equalsIgnoreCase(ipAddress)) {
+            ipAddress = request.getRemoteAddr();
+        }
+        Client userAgent = new Parser().parse(request.getHeader("User-Agent"));
+        log.info("User with IP {} and User-Agent {} authenticated", ipAddress, userAgent.userAgent.family);
+        log.info(request.getHeader("User-Agent"));
         this.delegate.onAuthenticationSuccess(request, response, authentication);
     }
 

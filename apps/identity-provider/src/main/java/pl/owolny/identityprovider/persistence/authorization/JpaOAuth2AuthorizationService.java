@@ -3,6 +3,8 @@ package pl.owolny.identityprovider.persistence.authorization;
 import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.Module;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.dao.DataRetrievalFailureException;
 import org.springframework.security.jackson2.SecurityJackson2Modules;
 import org.springframework.security.oauth2.core.*;
@@ -28,6 +30,7 @@ import java.util.function.Consumer;
 
 @Component
 public class JpaOAuth2AuthorizationService implements OAuth2AuthorizationService {
+    private static final Logger log = LoggerFactory.getLogger(JpaOAuth2AuthorizationService.class);
     private final AuthorizationRepository authorizationRepository;
     private final RegisteredClientRepository registeredClientRepository;
     private final ObjectMapper objectMapper = new ObjectMapper();
@@ -104,6 +107,7 @@ public class JpaOAuth2AuthorizationService implements OAuth2AuthorizationService
     }
 
     private OAuth2Authorization toObject(Authorization entity) {
+
         RegisteredClient registeredClient = this.registeredClientRepository.findById(entity.getRegisteredClientId());
         if (registeredClient == null) {
             throw new DataRetrievalFailureException(
