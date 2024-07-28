@@ -1,0 +1,50 @@
+<!DOCTYPE html>
+<html th:replace="~{layout/layout :: layout(~{::title}, ~{::main})}" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Rejestracja</title>
+</head>
+<body>
+    <main class="container">
+        <div th:if="${param.error}">
+            <p th:text="${param.error}">Message</p>
+        </div>
+        <div th:if="${error}">
+            <p th:text="${error}">Message</p>
+        </div>
+        <form class="form-signin w-100 m-auto" method="post" th:object="${registerDto}"
+             hx-post="/register-success" hx-trigger="submit" hx-target=".container" hx-swap="innerHTML">
+            <h1 class="h3 mb-3 fw-normal">Please register</h1>
+            <div class="form-floating">
+                <input th:field="*{username}" type="text" id="username" name="username" class="form-control" required autofocus>
+                <label for="username">Username</label>
+                <div class="form-label input-error" th:if="${#fields.hasErrors('username')}" th:errors="*{username}">Username </div>
+            </div>
+            <div class="form-floating">
+                <input th:field="*{email}" type="text" id="email" name="username" class="form-control" required autofocus>
+                <label for="email">Email</label>
+                <div class="form-label input-error" th:if="${#fields.hasErrors('email')}" th:errors="*{email}">Email </div>
+            </div>
+            <div class="form-floating">
+                <input th:field="*{password}" type="password" id="password" name="password" class="form-control" required>
+                <label for="password">Password</label>
+                <div class="form-label input-error" th:if="${#fields.hasErrors('password')}" th:errors="*{password}">Password </div>
+            </div>
+            <div class="form-floating">
+                <input th:field="*{confirmPassword}" type="password" id="confirmPassword" name="password" class="form-control" required>
+                <label for="confirmPassword">Confirm Password</label>
+                <div class="form-label input-error" th:if="${#fields.hasErrors('confirmPassword')}" th:errors="*{confirmPassword}">Password </div>
+            </div>
+            <a hx-get="/login" hx-target=".container" hx-push-url="true">Zaloguj się</a>
+            <div>
+                <button class="w-100 btn btn-lg btn-primary btn-block" type="submit">Register</button>
+                <a class="w-100 btn btn-light btn-block bg-white" href="/oauth2/authorization/google" role="link" style="margin-top: 10px">
+                    Register with Google
+                </a>
+                <a class="w-100 btn btn-light btn-block bg-white" href="/oauth2/authorization/github" role="link" style="margin-top: 10px">
+                    Register with Github
+                </a>
+            </div>
+        </form>
+    </main>
+</body>
+</html>
