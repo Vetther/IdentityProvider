@@ -17,17 +17,9 @@ public class JwkConfig {
     @Value("${jwt.key.public}")
     private RSAPublicKey publicKeyResource;
 
-    public RSAPrivateKey getPrivateKey() {
-        return privateKeyResource;
-    }
-
-    public RSAPublicKey getPublicKey() {
-        return publicKeyResource;
-    }
-
     public JWKSet getJwkSet() {
-        return new JWKSet(new RSAKey.Builder(getPublicKey())
-                .privateKey(getPrivateKey())
+        return new JWKSet(new RSAKey.Builder(this.publicKeyResource)
+                .privateKey(this.privateKeyResource)
                 .build());
     }
 }

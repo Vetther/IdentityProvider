@@ -30,6 +30,7 @@ import java.util.function.Consumer;
 
 @Component
 public class JpaOAuth2AuthorizationService implements OAuth2AuthorizationService {
+
     private static final Logger log = LoggerFactory.getLogger(JpaOAuth2AuthorizationService.class);
     private final AuthorizationRepository authorizationRepository;
     private final RegisteredClientRepository registeredClientRepository;
@@ -62,6 +63,7 @@ public class JpaOAuth2AuthorizationService implements OAuth2AuthorizationService
 
     @Override
     public void save(OAuth2Authorization authorization) {
+        log.info("Saving authorization {}", authorization);
         Assert.notNull(authorization, "authorization cannot be null");
         this.authorizationRepository.save(toEntity(authorization));
     }

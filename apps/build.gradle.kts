@@ -29,8 +29,13 @@ subprojects {
         implementation("org.springframework.boot:spring-boot-starter")
         implementation("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
         implementation("org.springframework.boot:spring-boot-starter-actuator")
+        compileOnly("org.springframework.boot:spring-boot-starter-webflux")
         developmentOnly("org.springframework.boot:spring-boot-devtools")
         testImplementation("org.springframework.boot:spring-boot-starter-test")
+        compileOnly("org.projectlombok:lombok")
+        annotationProcessor("org.projectlombok:lombok")
+        implementation("org.mapstruct:mapstruct:1.5.5.Final")
+        annotationProcessor("org.mapstruct:mapstruct-processor:1.5.5.Final")
     }
 
     dependencyManagement {

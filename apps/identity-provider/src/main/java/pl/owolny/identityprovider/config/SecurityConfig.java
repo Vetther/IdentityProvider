@@ -16,25 +16,31 @@ import org.springframework.security.web.authentication.AuthenticationSuccessHand
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import pl.owolny.identityprovider.federation.FederatedIdentityAuthenticationSuccessHandler;
 import pl.owolny.identityprovider.federation.UserRepositoryOAuth2UserHandler;
-
-import static org.springframework.security.config.Customizer.withDefaults;
+import pl.owolny.identityprovider.user.federation.CustomOidcUserService;
 
 @EnableWebSecurity
 @Configuration
 public class SecurityConfig {
 
+    private final CustomOidcUserService customOidcUserService;
+
+    public SecurityConfig(CustomOidcUserService customOidcUserService) {
+        this.customOidcUserService = customOidcUserService;
+    }
+
     @Bean
-    public SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
+    SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
         http
                 .authorizeHttpRequests(authorize ->
                         authorize
                                 .requestMatchers("/assets/**").permitAll()
                                 .requestMatchers("/webjars/**").permitAll()
                                 .requestMatchers("/register").permitAll()
-                                .requestMatchers("/register-success").permitAll()
                                 .requestMatchers("/error").permitAll()
+                                .requestMatchers("/test2").permitAll()
                                 .requestMatchers("/test3").permitAll()
                                 .requestMatchers("/login").permitAll()
+                                .requestMatchers("/logout").permitAll()
                                 .anyRequest().authenticated()
                 )
                 .sessionManagement(sessionManagement ->
@@ -43,40 +49,39 @@ public class SecurityConfig {
                 .formLogin(formLogin ->
                         formLogin
                                 .loginPage("/login")
+                                .successHandler(authenticationSuccessHandler())
                 )
                 .oauth2Login(oauth2Login ->
                         oauth2Login
                                 .loginPage("/login")
                                 .successHandler(authenticationSuccessHandler())
-                )
-                .oauth2Client(withDefaults());
+                                .userInfoEndpoint(userInfoEndpoint ->
+                                        userInfoEndpoint
+                                                .oidcUserService(this.customOidcUserService)
+                                )
+                );
+//                .oauth2Client(Customizer.withDefaults());
 
         return http.build();
     }
 
-    private AuthenticationSuccessHandler authenticationSuccessHandler() {
-        FederatedIdentityAuthenticationSuccessHandler federatedIdentityAuthenticationSuccessHandler = new FederatedIdentityAuthenticationSuccessHandler();
-        federatedIdentityAuthenticationSuccessHandler.setOAuth2UserHandler(userRepositoryOAuth2UserHandler());
-        return federatedIdentityAuthenticationSuccessHandler;
-    }
-
     @Bean
-    public UserRepositoryOAuth2UserHandler userRepositoryOAuth2UserHandler() {
+    UserRepositoryOAuth2UserHandler userRepositoryOAuth2UserHandler() {
         return new UserRepositoryOAuth2UserHandler();
     }
 
     @Bean
-    public UserDetailsService users() {
-        UserDetails user = User.withDefaultPasswordEncoder()
+    UserDetailsService users() {
+        UserDetails user = User.builder()
                 .username("test")
-                .password("test")
+                .password("{noop}test")
                 .roles("USER")
                 .build();
         return new InMemoryUserDetailsManager(user);
     }
 
     @Bean
-    public MessageSource messageSource() {
+    MessageSource messageSource() {
         ReloadableResourceBundleMessageSource messageSource
                 = new ReloadableResourceBundleMessageSource();
 
@@ -86,9 +91,15 @@ public class SecurityConfig {
     }
 
     @Bean
-    public LocalValidatorFactoryBean getValidator() {
+    LocalValidatorFactoryBean getValidator() {
         LocalValidatorFactoryBean bean = new LocalValidatorFactoryBean();
         bean.setValidationMessageSource(messageSource());
         return bean;
+    }
+
+    private AuthenticationSuccessHandler authenticationSuccessHandler() {
+        FederatedIdentityAuthenticationSuccessHandler federatedIdentityAuthenticationSuccessHandler = new FederatedIdentityAuthenticationSuccessHandler();
+        federatedIdentityAuthenticationSuccessHandler.setOAuth2UserHandler(userRepositoryOAuth2UserHandler());
+        return federatedIdentityAuthenticationSuccessHandler;
     }
 }

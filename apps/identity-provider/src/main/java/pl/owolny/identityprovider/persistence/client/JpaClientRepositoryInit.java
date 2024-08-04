@@ -45,10 +45,10 @@ public class JpaClientRepositoryInit {
                 .clientSecret("{noop}secret")
                 .clientAuthenticationMethods(convert(ClientAuthenticationMethod.CLIENT_SECRET_BASIC.getValue()))
                 .authorizationGrantTypes(convert(AuthorizationGrantType.CLIENT_CREDENTIALS.getValue()))
+                .scopes(null)
                 .redirectUris(null)
                 .clientSettings(null)
                 .build();
-
 
         if (clientRepository.findByClientId("client").isEmpty()) {
             log.info("Creating client");
