@@ -1,3 +1,5 @@
+import io.gatling.gradle.LogHttp
+
 dependencies {
     implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
@@ -14,4 +16,21 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("com.github.ua-parser:uap-java:1.6.1")
     runtimeOnly("org.postgresql:postgresql")
+
+    gatlingImplementation("com.google.guava:guava:33.1.0-jre")
+    gatlingImplementation("org.apache.commons:commons-lang3:3.14.0")
+    gatlingCompileOnly("org.projectlombok:lombok")
+    gatlingAnnotationProcessor("org.projectlombok:lombok")
+}
+
+plugins {
+    id("io.gatling.gradle") version "3.9.5.1"
+}
+
+gatling {
+    gatlingVersion = "3.10.5"
+    logLevel = "DEBUG"
+    logHttp = LogHttp.NONE
+    enterprise.closureOf<Any> {
+    }
 }

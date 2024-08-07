@@ -1,12 +1,13 @@
 import org.springframework.boot.gradle.tasks.bundling.BootBuildImage
 
 val springCloudVersion by extra { "2023.0.3" }
-val springBootVersion by extra { "3.3.1" }
+val springBootVersion by extra { "3.3.2" }
 
 plugins {
     java
-    id("org.springframework.boot") version "3.3.1"
+    id("org.springframework.boot") version "3.3.2"
     id("io.spring.dependency-management") version "1.1.5"
+//    id("org.graalvm.buildtools.native") version "0.10.2"
 }
 
 allprojects {
@@ -14,14 +15,17 @@ allprojects {
     version = "1.0"
 }
 
+allprojects {
+    repositories {
+        mavenCentral()
+    }
+}
+
 subprojects {
     apply(plugin = "java")
     apply(plugin = "org.springframework.boot")
     apply(plugin = "io.spring.dependency-management")
-
-    repositories {
-        mavenCentral()
-    }
+//    apply(plugin = "org.graalvm.buildtools.native")
 
     java.sourceCompatibility = JavaVersion.VERSION_21
 
@@ -29,13 +33,13 @@ subprojects {
         implementation("org.springframework.boot:spring-boot-starter")
         implementation("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
         implementation("org.springframework.boot:spring-boot-starter-actuator")
-        compileOnly("org.springframework.boot:spring-boot-starter-webflux")
         developmentOnly("org.springframework.boot:spring-boot-devtools")
         testImplementation("org.springframework.boot:spring-boot-starter-test")
         compileOnly("org.projectlombok:lombok")
         annotationProcessor("org.projectlombok:lombok")
         implementation("org.mapstruct:mapstruct:1.5.5.Final")
         annotationProcessor("org.mapstruct:mapstruct-processor:1.5.5.Final")
+        implementation("io.micrometer:micrometer-registry-prometheus")
     }
 
     dependencyManagement {
@@ -46,7 +50,8 @@ subprojects {
     }
 
     tasks.withType<BootBuildImage> {
-        imageName = "owolny/${rootProject.name}-${project.name}"
+        imageName = "vetther/${rootProject.name}-${project.name}"
+        buildpacks = listOf("gcr.io/paketo-buildpacks/eclipse-openj9:latest", "paketo-buildpacks/java")
     }
 
     configurations {

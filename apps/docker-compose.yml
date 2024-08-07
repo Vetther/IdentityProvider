@@ -2,39 +2,115 @@ version: '3.9'
 
 services:
 
+  prometheus:
+    image: "prom/prometheus:v2.44.0"
+    container_name: prometheus
+    ports:
+      - "9090:9090"
+    volumes:
+      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+    networks:
+      - backend
+
+  grafana:
+    image: "grafana/grafana:9.5.2"
+    container_name: grafana
+    ports:
+      - "3000:3000"
+    restart: unless-stopped
+    links:
+      - prometheus:prometheus
+    volumes:
+      - ./monitoring/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+    networks:
+      - backend
+
+  db:
+    image: "postgres:14-alpine"
+    ports:
+      - "5432"
+    environment:
+        - "POSTGRES_USER=postgres"
+        - "POSTGRES_PASSWORD=postgres"
+        - "POSTGRES_DB=postgres"
+    networks:
+      - backend
+
   discovery-server:
-    image: "owolny/apps-discovery-server"
+    image: "vetther/apps-discovery-server"
     ports:
       - "8761:8761"
     environment:
       - "spring.profiles.active=prod"
+      - JAVA_TOOL_OPTIONS=
+        -Xmx128m
+        -XX:+IdleTuningGcOnIdle
+        -XX:+IdleTuningCompactOnIdle
+        -Xtune:virtualized
+        -Xscmx128m
+        -Xscmaxaot100m
+        -Xquickstart
+        -Xshareclasses
     networks:
       - backend
 
   api-gateway:
-    image: "owolny/apps-api-gateway"
+    image: "vetther/apps-api-gateway"
     ports:
       - "8080:8080"
     environment:
       - "spring.profiles.active=docker"
       - "eureka.instance.prefer-ip-address=true"
+      - JAVA_TOOL_OPTIONS=
+        -Xmx128m
+        -XX:+IdleTuningGcOnIdle
+        -XX:+IdleTuningCompactOnIdle
+        -Xtune:virtualized
+        -Xscmx128m
+        -Xscmaxaot100m
+        -Xquickstart
+        -Xshareclasses
     depends_on:
       - discovery-server
     networks:
       - backend
+  #        -XX:+UseG1GC
+  #        -Xshareclasses:bootClassesOnly,nonFatal,silent
 
   identity-provider:
-    image: "owolny/apps-identity-provider"
+    image: "vetther/apps-identity-provider"
     ports:
       - "9000:9000"
+      - "9010:9010"
     environment:
       - "spring.profiles.active=docker"
       - "eureka.instance.prefer-ip-address=true"
+      - JAVA_TOOL_OPTIONS=
+        -Xmx128m
+        -XX:+IdleTuningGcOnIdle
+        -XX:+IdleTuningCompactOnIdle
+        -Xgcpolicy:gencon
+        -Xtune:virtualized
+        -Xscmx128m
+        -Xscmaxaot100m
+        -Xquickstart
+        -Xshareclasses
+        -Dcom.sun.management.jmxremote=true
+        -Dcom.sun.management.jmxremote.local.only=false
+        -Dcom.sun.management.jmxremote.authenticate=false
+        -Dcom.sun.management.jmxremote.ssl=false
+        -Djava.rmi.server.hostname=localhost
+        -Dcom.sun.management.jmxremote.port=9010
+        -Dcom.sun.management.jmxremote.rmi.port=9010
     depends_on:
       - discovery-server
       - api-gateway
     networks:
       - backend
+    deploy:
+      resources:
+        limits:
+          memory: 1000m
 
 networks:
   backend:
