@@ -1,4 +1,4 @@
-package pl.owolny.identityprovider.web.register;
+package pl.owolny.identityprovider.web.dto;
 
 import jakarta.validation.constraints.Email;
 import jakarta.validation.constraints.NotEmpty;

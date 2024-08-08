@@ -1,12 +1,11 @@
 package pl.owolny.identityprovider.persistence.client;
 
-import java.time.Instant;
-
 import jakarta.persistence.Column;
 import jakarta.persistence.Entity;
 import jakarta.persistence.Id;
 import lombok.*;
-import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
+
+import java.time.Instant;
 
 @Entity
 @Setter
@@ -14,7 +13,7 @@ import org.springframework.security.oauth2.server.authorization.client.Registere
 @Builder
 @NoArgsConstructor
 @AllArgsConstructor
-public class Client {
+class Client {
 
     @Id
     private String id;

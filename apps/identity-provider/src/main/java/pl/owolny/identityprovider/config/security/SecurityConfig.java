@@ -1,4 +1,4 @@
-package pl.owolny.identityprovider.config;
+package pl.owolny.identityprovider.config.security;
 
 import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
@@ -7,34 +7,42 @@ import org.springframework.context.support.ReloadableResourceBundleMessageSource
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.User;
-import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
-import org.springframework.security.provisioning.InMemoryUserDetailsManager;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+import pl.owolny.identityprovider.domain.auth.oauth2user.CustomOAuth2UserService;
+import pl.owolny.identityprovider.domain.auth.oidcuser.CustomOidcUserService;
+import pl.owolny.identityprovider.domain.auth.user.CustomUserDetailsService;
+import pl.owolny.identityprovider.domain.user.UserService;
 import pl.owolny.identityprovider.federation.FederatedIdentityAuthenticationSuccessHandler;
 import pl.owolny.identityprovider.federation.UserRepositoryOAuth2UserHandler;
-import pl.owolny.identityprovider.user.federation.CustomOidcUserService;
+import pl.owolny.identityprovider.federation.UserRepositoryOidcUserHandler;
 
 @EnableWebSecurity
 @Configuration
 public class SecurityConfig {
 
+    private final UserService userService;
     private final CustomOidcUserService customOidcUserService;
+    private final CustomOAuth2UserService customOAuth2UserService;
+    private final CustomUserDetailsService customUserDetailsService;
 
-    public SecurityConfig(CustomOidcUserService customOidcUserService) {
+    public SecurityConfig(UserService userService, CustomOidcUserService customOidcUserService, CustomOAuth2UserService customOAuth2UserService, CustomUserDetailsService customUserDetailsService) {
+        this.userService = userService;
         this.customOidcUserService = customOidcUserService;
+        this.customOAuth2UserService = customOAuth2UserService;
+        this.customUserDetailsService = customUserDetailsService;
     }
 
     @Bean
     SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
-        http
+        return http
                 .authorizeHttpRequests(authorize ->
                         authorize
                                 .requestMatchers("/assets/**").permitAll()
                                 .requestMatchers("/webjars/**").permitAll()
+                                .requestMatchers("/actuator/**").permitAll()
                                 .requestMatchers("/register").permitAll()
                                 .requestMatchers("/error").permitAll()
                                 .requestMatchers("/test2").permitAll()
@@ -58,26 +66,25 @@ public class SecurityConfig {
                                 .userInfoEndpoint(userInfoEndpoint ->
                                         userInfoEndpoint
                                                 .oidcUserService(this.customOidcUserService)
+                                                .userService(this.customOAuth2UserService)
                                 )
-                );
-//                .oauth2Client(Customizer.withDefaults());
-
-        return http.build();
+                )
+                .build();
     }
 
     @Bean
     UserRepositoryOAuth2UserHandler userRepositoryOAuth2UserHandler() {
-        return new UserRepositoryOAuth2UserHandler();
+        return new UserRepositoryOAuth2UserHandler(this.userService);
+    }
+
+    @Bean
+    UserRepositoryOidcUserHandler userRepositoryOidcUserHandler() {
+        return new UserRepositoryOidcUserHandler(this.userService);
     }
 
     @Bean
     UserDetailsService users() {
-        UserDetails user = User.builder()
-                .username("test")
-                .password("{noop}test")
-                .roles("USER")
-                .build();
-        return new InMemoryUserDetailsManager(user);
+        return this.customUserDetailsService;
     }
 
     @Bean
@@ -100,6 +107,7 @@ public class SecurityConfig {
     private AuthenticationSuccessHandler authenticationSuccessHandler() {
         FederatedIdentityAuthenticationSuccessHandler federatedIdentityAuthenticationSuccessHandler = new FederatedIdentityAuthenticationSuccessHandler();
         federatedIdentityAuthenticationSuccessHandler.setOAuth2UserHandler(userRepositoryOAuth2UserHandler());
+        federatedIdentityAuthenticationSuccessHandler.setOidcUserHandler(userRepositoryOidcUserHandler());
         return federatedIdentityAuthenticationSuccessHandler;
     }
 }

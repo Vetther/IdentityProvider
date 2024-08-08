@@ -1,4 +1,4 @@
-package pl.owolny.identityprovider.config;
+package pl.owolny.identityprovider.config.security;
 
 import com.nimbusds.jose.jwk.JWKSet;
 import com.nimbusds.jose.jwk.RSAKey;
@@ -11,11 +11,14 @@ import java.security.interfaces.RSAPublicKey;
 @Configuration
 public class JwkConfig {
 
-    @Value("${jwt.key.private}")
-    private RSAPrivateKey privateKeyResource;
+    private final RSAPrivateKey privateKeyResource;
+    private final RSAPublicKey publicKeyResource;
 
-    @Value("${jwt.key.public}")
-    private RSAPublicKey publicKeyResource;
+    public JwkConfig(@Value("${jwt.key.private}") RSAPrivateKey privateKeyResource,
+                     @Value("${jwt.key.public}") RSAPublicKey publicKeyResource) {
+        this.privateKeyResource = privateKeyResource;
+        this.publicKeyResource = publicKeyResource;
+    }
 
     public JWKSet getJwkSet() {
         return new JWKSet(new RSAKey.Builder(this.publicKeyResource)

@@ -18,17 +18,17 @@ import java.util.function.BiConsumer;
 public final class FederatedIdentityAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
 
     private final AuthenticationSuccessHandler delegate = new SavedRequestAwareAuthenticationSuccessHandler();
-    private final BiConsumer<OidcUser, FederatedProvider> oidcUserHandler = (user, federatedProvider) -> this.oauth2UserHandler.accept(user, federatedProvider);
+    private BiConsumer<OidcUser, FederatedProvider> oidcUserHandler;
     private BiConsumer<OAuth2User, FederatedProvider> oauth2UserHandler;
 
     @Override
     public void onAuthenticationSuccess(HttpServletRequest request, HttpServletResponse response, Authentication authentication) throws IOException, ServletException {
         if (authentication instanceof OAuth2AuthenticationToken auth && authentication.getPrincipal() instanceof OidcUser oidcUser) {
             log.info("OIDC User {} authentication successful", oidcUser.getName());
-//            this.oidcUserHandler.accept(oidcUser, resolveFederatedProvider(auth));
+            this.oauth2UserHandler.accept(oidcUser, resolveFederatedProvider(auth));
         } else if (authentication instanceof OAuth2AuthenticationToken auth && authentication.getPrincipal() instanceof OAuth2User oAuth2User) {
             log.info("OAuth2 User {} authentication successful", oAuth2User.getName());
-//            this.oauth2UserHandler.accept(oAuth2User, resolveFederatedProvider(auth));
+            this.oauth2UserHandler.accept(oAuth2User, resolveFederatedProvider(auth));
         }
         this.delegate.onAuthenticationSuccess(request, response, authentication);
     }
@@ -39,6 +39,10 @@ public final class FederatedIdentityAuthenticationSuccessHandler implements Auth
 
     public void setOAuth2UserHandler(BiConsumer<OAuth2User, FederatedProvider> oauth2UserHandler) {
         this.oauth2UserHandler = oauth2UserHandler;
+    }
+
+    public void setOidcUserHandler(BiConsumer<OidcUser, FederatedProvider> oidcUserHandler) {
+        this.oidcUserHandler = oidcUserHandler;
     }
 
 //    String ipAddress = request.getHeader("X-Forwarded-For");

@@ -1,67 +1,66 @@
 package pl.owolny.identityprovider.persistence.client;
 
 import jakarta.annotation.PostConstruct;
-import org.slf4j.Logger;
-import org.slf4j.LoggerFactory;
+import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.oauth2.core.AuthorizationGrantType;
 import org.springframework.security.oauth2.core.ClientAuthenticationMethod;
 import org.springframework.security.oauth2.core.oidc.OidcScopes;
+import org.springframework.security.oauth2.server.authorization.client.RegisteredClient;
+import org.springframework.security.oauth2.server.authorization.settings.ClientSettings;
+import org.springframework.security.oauth2.server.authorization.settings.TokenSettings;
 import org.springframework.stereotype.Component;
-import org.springframework.util.StringUtils;
 
 import java.util.List;
+import java.util.Set;
 import java.util.UUID;
+import java.util.stream.Stream;
 
+@Slf4j
 @Component
-public class JpaClientRepositoryInit {
+class JpaClientRepositoryInit {
 
-    private static final Logger log = LoggerFactory.getLogger(JpaClientRepositoryInit.class);
-    private final ClientRepository clientRepository;
+    private final TokenSettings tokenSettings;
+    private final JpaRegisteredClientRepository registeredClientRepository;
 
-    public JpaClientRepositoryInit(ClientRepository clientRepository) {
-        this.clientRepository = clientRepository;
+    public JpaClientRepositoryInit(TokenSettings tokenSettings, JpaRegisteredClientRepository registeredClientRepository) {
+        this.tokenSettings = tokenSettings;
+        this.registeredClientRepository = registeredClientRepository;
     }
 
     @PostConstruct
-    void init() {
-        clientCreation();
-    }
-
-    private void clientCreation() {
-        Client client = Client.builder()
-                .id(UUID.randomUUID().toString())
-                .clientId("client")
-                .clientSecret("{noop}secret")
-                .clientAuthenticationMethods(convert(ClientAuthenticationMethod.CLIENT_SECRET_BASIC.getValue()))
-                .authorizationGrantTypes(convert(AuthorizationGrantType.AUTHORIZATION_CODE.getValue(), AuthorizationGrantType.REFRESH_TOKEN.getValue()))
-                .redirectUris(convert("http://localhost:3000", "https://oauth.pstmn.io/v1/callback"))
-                .scopes(convert(OidcScopes.OPENID, OidcScopes.PROFILE, OidcScopes.EMAIL))
-                .clientSettings(null)
-                .build();
-
-        Client idpClient = Client.builder()
-                .id(UUID.randomUUID().toString())
-                .clientId("idp-client")
-                .clientSecret("{noop}secret")
-                .clientAuthenticationMethods(convert(ClientAuthenticationMethod.CLIENT_SECRET_BASIC.getValue()))
-                .authorizationGrantTypes(convert(AuthorizationGrantType.CLIENT_CREDENTIALS.getValue()))
-                .scopes(null)
-                .redirectUris(null)
-                .clientSettings(null)
-                .build();
-
-        if (clientRepository.findByClientId("client").isEmpty()) {
-            log.info("Creating client");
-            clientRepository.save(client);
-        }
-        if (clientRepository.findByClientId("idp-client").isEmpty()) {
-            log.info("Creating idp-client");
-            clientRepository.save(idpClient);
-        }
-    }
-
-    @SafeVarargs
-    private <T> String convert(T... elements) {
-        return StringUtils.collectionToCommaDelimitedString(List.of(elements));
+    public void registerClients() {
+        Stream.of(
+                /*
+                  Registered client
+                 */
+                RegisteredClient.withId(UUID.randomUUID().toString())
+                        .clientId("client")
+                        .clientSecret("{noop}secret")
+                        .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+                        .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
+                        .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
+                        .redirectUris(uri -> uri.addAll(List.of("http://localhost:3000", "https://oauth.pstmn.io/v1/callback")))
+                        .postLogoutRedirectUri("http://127.0.0.1:9000/login")
+                        .scopes(scopes -> scopes.addAll(Set.of(OidcScopes.OPENID, OidcScopes.PROFILE, OidcScopes.EMAIL)))
+                        .clientSettings(ClientSettings.builder().requireAuthorizationConsent(false).build())
+                        .tokenSettings(this.tokenSettings)
+                        .build(),
+                /*
+                  Registered client for user-service
+                 */
+                RegisteredClient.withId("user-service-client")
+                        .clientId("user-service-client")
+                        .clientSecret("{noop}secret")
+                        .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
+                        .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
+                        .scopes(scopes -> scopes.addAll(Set.of(OidcScopes.OPENID, OidcScopes.PROFILE, OidcScopes.EMAIL)))
+                        .tokenSettings(this.tokenSettings)
+                        .build()
+        ).forEach(client -> {
+            if (this.registeredClientRepository.findByClientId(client.getClientId()) == null) {
+                log.info("Creating client {} in db", client.getClientId());
+                this.registeredClientRepository.save(client);
+            }
+        });
     }
 }

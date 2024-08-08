@@ -13,7 +13,7 @@ import java.time.Instant;
 @Getter
 @Entity
 @Table(name = "`authorization`")
-public class Authorization {
+class Authorization {
     @Id
     @Column
     private String id;

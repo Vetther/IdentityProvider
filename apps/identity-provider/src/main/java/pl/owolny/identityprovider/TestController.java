@@ -3,19 +3,16 @@ package pl.owolny.identityprovider;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.RestController;
-import org.springframework.web.reactive.function.client.WebClient;
-import pl.owolny.identityprovider.user.UserClient;
+import org.springframework.web.client.RestClient;
 
 @RestController
 @Slf4j
 public class TestController {
 
-    private final UserClient userClient;
-    private final WebClient webClient;
+    private final RestClient restClient;
 
-    public TestController(UserClient userClient, WebClient webClient) {
-        this.userClient = userClient;
-        this.webClient = webClient;
+    public TestController(RestClient restClient) {
+        this.restClient = restClient;
     }
 
     @GetMapping("/test")
@@ -25,15 +22,9 @@ public class TestController {
 
     @GetMapping("/test3")
     public String test3() {
-        return webClient.get()
+        return restClient.get()
                 .uri("http://localhost:8080/test")
                 .retrieve()
-                .bodyToMono(String.class)
-                .block();
-    }
-
-    @GetMapping("/test2")
-    public String test2() {
-        return userClient.test();
+                .body(String.class);
     }
 }
