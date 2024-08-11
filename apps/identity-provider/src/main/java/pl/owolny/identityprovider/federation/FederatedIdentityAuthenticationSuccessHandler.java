@@ -18,7 +18,6 @@ import java.util.function.BiConsumer;
 public final class FederatedIdentityAuthenticationSuccessHandler implements AuthenticationSuccessHandler {
 
     private final AuthenticationSuccessHandler delegate = new SavedRequestAwareAuthenticationSuccessHandler();
-    private BiConsumer<OidcUser, FederatedProvider> oidcUserHandler;
     private BiConsumer<OAuth2User, FederatedProvider> oauth2UserHandler;
 
     @Override
@@ -39,10 +38,6 @@ public final class FederatedIdentityAuthenticationSuccessHandler implements Auth
 
     public void setOAuth2UserHandler(BiConsumer<OAuth2User, FederatedProvider> oauth2UserHandler) {
         this.oauth2UserHandler = oauth2UserHandler;
-    }
-
-    public void setOidcUserHandler(BiConsumer<OidcUser, FederatedProvider> oidcUserHandler) {
-        this.oidcUserHandler = oidcUserHandler;
     }
 
 //    String ipAddress = request.getHeader("X-Forwarded-For");

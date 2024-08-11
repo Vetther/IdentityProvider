@@ -2,6 +2,7 @@ package pl.owolny.identityprovider.domain.user;
 
 import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
 import pl.owolny.identityprovider.domain.auth.FederatedIdentityAccount;
 import pl.owolny.identityprovider.domain.authority.Authority;
@@ -22,11 +23,13 @@ class UserRepositoryInit {
     private final UserRepository userRepository;
     private final RoleRepository roleRepository;
     private final AuthorityRepository authorityRepository;
+    private final PasswordEncoder passwordEncoder;
 
-    UserRepositoryInit(UserRepository userRepository, RoleRepository roleRepository, AuthorityRepository authorityRepository) {
+    UserRepositoryInit(UserRepository userRepository, RoleRepository roleRepository, AuthorityRepository authorityRepository, PasswordEncoder passwordEncoder) {
         this.userRepository = userRepository;
         this.roleRepository = roleRepository;
         this.authorityRepository = authorityRepository;
+        this.passwordEncoder = passwordEncoder;
     }
 
     @PostConstruct
@@ -49,7 +52,7 @@ class UserRepositoryInit {
                         .authorities(Set.of(adminAuthority, adminAuthority2))
                         .build()
         );
-        Credentials credentials = Credentials.builder().passwordHash("test").build();
+        Credentials credentials = Credentials.builder().passwordHash(passwordEncoder.encode("test")).build();
 
         log.info("Roles and authorities registered");
         log.info("Registering default user");

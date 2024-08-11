@@ -5,6 +5,9 @@ services:
   prometheus:
     image: "prom/prometheus:v2.44.0"
     container_name: prometheus
+    command:
+      - --enable-feature=exemplar-storage
+      - --config.file=/etc/prometheus/prometheus.yml
     ports:
       - "9090:9090"
     volumes:
@@ -13,7 +16,7 @@ services:
       - backend
 
   grafana:
-    image: "grafana/grafana:9.5.2"
+    image: "grafana/grafana:11.1.1"
     container_name: grafana
     ports:
       - "3000:3000"
@@ -21,10 +24,30 @@ services:
     links:
       - prometheus:prometheus
     volumes:
-      - ./monitoring/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources
+      - ./monitoring/grafana/var:/var/lib/grafana
+      - ./monitoring/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
     networks:
       - backend
 
+  loki:
+    image: grafana/loki:main
+    command: [ "-config.file=/etc/loki/local-config.yaml" ]
+    ports:
+      - "3100:3100"
+    networks:
+      - backend
+
+  tempo:
+    image: grafana/tempo:latest
+    command: [ "-config.file=/etc/tempo.yaml" ]
+    volumes:
+      - ./monitoring/tempo/tempo.yml:/etc/tempo.yaml:ro
+      - ./monitoring/tempo/tempo-data:/tmp/tempo
+    ports:
+      - "3110:3100"  # Tempo
+      - "9411:9411" # zipkin
+    networks:
+      - backend
   db:
     image: "postgres:14-alpine"
     ports:
@@ -111,6 +134,7 @@ services:
       resources:
         limits:
           memory: 1000m
+          cpus: '2'
 
 networks:
   backend:

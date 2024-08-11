@@ -4,10 +4,12 @@ import org.springframework.context.MessageSource;
 import org.springframework.context.annotation.Bean;
 import org.springframework.context.annotation.Configuration;
 import org.springframework.context.support.ReloadableResourceBundleMessageSource;
+import org.springframework.security.authentication.AuthenticationProvider;
+import org.springframework.security.authentication.dao.DaoAuthenticationProvider;
 import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
-import org.springframework.security.core.userdetails.UserDetailsService;
+import org.springframework.security.crypto.password.NoOpPasswordEncoder;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
@@ -17,7 +19,6 @@ import pl.owolny.identityprovider.domain.auth.user.CustomUserDetailsService;
 import pl.owolny.identityprovider.domain.user.UserService;
 import pl.owolny.identityprovider.federation.FederatedIdentityAuthenticationSuccessHandler;
 import pl.owolny.identityprovider.federation.UserRepositoryOAuth2UserHandler;
-import pl.owolny.identityprovider.federation.UserRepositoryOidcUserHandler;
 
 @EnableWebSecurity
 @Configuration
@@ -69,22 +70,27 @@ public class SecurityConfig {
                                                 .userService(this.customOAuth2UserService)
                                 )
                 )
+                .authenticationProvider(authenticationProvider())
                 .build();
     }
 
+//    @Bean
+//    public PasswordEncoder passwordEncoder() {
+//        return new BCryptPasswordEncoder();
+//    }
+
     @Bean
-    UserRepositoryOAuth2UserHandler userRepositoryOAuth2UserHandler() {
-        return new UserRepositoryOAuth2UserHandler(this.userService);
+    public NoOpPasswordEncoder passwordEncoder() {
+        return (NoOpPasswordEncoder) NoOpPasswordEncoder.getInstance();
     }
 
     @Bean
-    UserRepositoryOidcUserHandler userRepositoryOidcUserHandler() {
-        return new UserRepositoryOidcUserHandler(this.userService);
-    }
+    public AuthenticationProvider authenticationProvider() {
+        DaoAuthenticationProvider provider = new DaoAuthenticationProvider();
+        provider.setUserDetailsService(this.customUserDetailsService);
+        provider.setPasswordEncoder(passwordEncoder());
+        return provider;
 
-    @Bean
-    UserDetailsService users() {
-        return this.customUserDetailsService;
     }
 
     @Bean
@@ -104,10 +110,14 @@ public class SecurityConfig {
         return bean;
     }
 
+    @Bean
+    UserRepositoryOAuth2UserHandler userRepositoryOAuth2UserHandler() {
+        return new UserRepositoryOAuth2UserHandler(this.userService);
+    }
+
     private AuthenticationSuccessHandler authenticationSuccessHandler() {
         FederatedIdentityAuthenticationSuccessHandler federatedIdentityAuthenticationSuccessHandler = new FederatedIdentityAuthenticationSuccessHandler();
         federatedIdentityAuthenticationSuccessHandler.setOAuth2UserHandler(userRepositoryOAuth2UserHandler());
-        federatedIdentityAuthenticationSuccessHandler.setOidcUserHandler(userRepositoryOidcUserHandler());
         return federatedIdentityAuthenticationSuccessHandler;
     }
 }

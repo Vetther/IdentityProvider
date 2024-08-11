@@ -1,11 +1,17 @@
 global:
-  scrape_interval:     5s
-  evaluation_interval: 5s
+  scrape_interval: 2s
+  evaluation_interval: 2s
 
 scrape_configs:
+  - job_name: 'prometheus'
+    static_configs:
+      - targets: [ 'prometheus:9090' ]
+
   - job_name: 'identity_provider'
     metrics_path: '/actuator/prometheus'
     static_configs:
       - targets: ['identity-provider:9000']
+#      - targets: ['host.docker.internal:9000']
         labels:
           application: 'Identity Provider Application'
+          instance_name: 'identity-provider'

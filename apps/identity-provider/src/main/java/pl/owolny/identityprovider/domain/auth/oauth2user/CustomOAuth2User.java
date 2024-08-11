@@ -1,6 +1,7 @@
 package pl.owolny.identityprovider.domain.auth.oauth2user;
 
 import com.fasterxml.jackson.annotation.JsonCreator;
+import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
 import com.fasterxml.jackson.databind.annotation.JsonSerialize;
@@ -8,20 +9,18 @@ import lombok.Getter;
 import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.AuthorityUtils;
-import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
-import pl.owolny.identityprovider.domain.user.User;
 import pl.owolny.identityprovider.federation.FederatedAuth;
 import pl.owolny.identityprovider.federation.FederatedProvider;
 
 import java.time.Instant;
 import java.util.*;
-import java.util.stream.Collectors;
 
 @Getter
 @Setter
 @JsonDeserialize
 @JsonSerialize
+@JsonIgnoreProperties({"attributes"})
 public class CustomOAuth2User extends DefaultOAuth2User implements FederatedAuth {
 
     private UUID id;
@@ -34,6 +33,7 @@ public class CustomOAuth2User extends DefaultOAuth2User implements FederatedAuth
     private Collection<? extends GrantedAuthority> authorities = new HashSet<>();
 
     @JsonCreator
+    @JsonIgnoreProperties({"attributes"})
     public CustomOAuth2User(@JsonProperty("authorities") Collection<? extends GrantedAuthority> authorities,
                             @JsonProperty("attributes") Map<String, Object> attributes) {
         super(AuthorityUtils.NO_AUTHORITIES, attributes, "sub");
@@ -51,16 +51,6 @@ public class CustomOAuth2User extends DefaultOAuth2User implements FederatedAuth
         if (authorities != null) {
             this.authorities = authorities;
         }
-    }
-
-    public static CustomOAuth2User fromUser(User user) {
-        Set<GrantedAuthority> authorities = user.getRoles().stream()
-                .flatMap(role -> role.getAuthorities().stream()
-                        .map(authority -> new SimpleGrantedAuthority(authority.getName()))
-                )
-                .collect(Collectors.toSet());
-
-        return new CustomOAuth2User(authorities, Map.of("sub", user.getId().toString()), "sub");
     }
 
     private static Map<String, Object> createAttributes(Map<String, Object> attributes, String attributeNameKey) {

@@ -22,7 +22,7 @@ public class Credentials implements Serializable {
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)
     private UUID id;
-
+    
     private String passwordHash;
 
     @CreationTimestamp

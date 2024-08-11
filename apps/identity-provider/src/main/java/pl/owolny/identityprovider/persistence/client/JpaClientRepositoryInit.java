@@ -35,7 +35,7 @@ class JpaClientRepositoryInit {
                  */
                 RegisteredClient.withId(UUID.randomUUID().toString())
                         .clientId("client")
-                        .clientSecret("{noop}secret")
+                        .clientSecret("secret")
                         .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
                         .authorizationGrantType(AuthorizationGrantType.AUTHORIZATION_CODE)
                         .authorizationGrantType(AuthorizationGrantType.REFRESH_TOKEN)
@@ -50,7 +50,7 @@ class JpaClientRepositoryInit {
                  */
                 RegisteredClient.withId("user-service-client")
                         .clientId("user-service-client")
-                        .clientSecret("{noop}secret")
+                        .clientSecret("secret")
                         .clientAuthenticationMethod(ClientAuthenticationMethod.CLIENT_SECRET_BASIC)
                         .authorizationGrantType(AuthorizationGrantType.CLIENT_CREDENTIALS)
                         .scopes(scopes -> scopes.addAll(Set.of(OidcScopes.OPENID, OidcScopes.PROFILE, OidcScopes.EMAIL)))

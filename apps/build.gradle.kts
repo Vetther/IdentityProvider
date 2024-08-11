@@ -31,6 +31,7 @@ subprojects {
 
     dependencies {
         implementation("org.springframework.boot:spring-boot-starter")
+        implementation("org.springframework.boot:spring-boot-starter-aop")
         implementation("org.springframework.cloud:spring-cloud-starter-netflix-eureka-client")
         implementation("org.springframework.boot:spring-boot-starter-actuator")
         developmentOnly("org.springframework.boot:spring-boot-devtools")
@@ -39,7 +40,12 @@ subprojects {
         annotationProcessor("org.projectlombok:lombok")
         implementation("org.mapstruct:mapstruct:1.5.5.Final")
         annotationProcessor("org.mapstruct:mapstruct-processor:1.5.5.Final")
+
+        // Observability
+        implementation("com.github.loki4j:loki-logback-appender:1.6.0-m1")
         implementation("io.micrometer:micrometer-registry-prometheus")
+        implementation("io.micrometer:micrometer-tracing-bridge-brave")
+        implementation("io.zipkin.reporter2:zipkin-reporter-brave")
     }
 
     dependencyManagement {
