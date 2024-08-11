@@ -41,3 +41,6 @@ bin/
 
 ### ENV ###
 **/env.properties
+
+/apps/monitoring/grafana/var
+/apps/monitoring/tempo/tempo-data
