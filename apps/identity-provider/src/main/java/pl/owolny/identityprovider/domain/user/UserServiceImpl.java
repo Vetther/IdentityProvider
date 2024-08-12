@@ -1,5 +1,6 @@
 package pl.owolny.identityprovider.domain.user;
 
+import jakarta.transaction.Transactional;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
 import pl.owolny.identityprovider.domain.authority.RoleService;
@@ -10,6 +11,7 @@ import java.util.UUID;
 
 @Service
 @Slf4j
+@Transactional
 class UserServiceImpl implements UserService {
 
     private final UserRepository userRepository;

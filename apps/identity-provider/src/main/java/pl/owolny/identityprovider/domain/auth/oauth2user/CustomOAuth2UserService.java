@@ -9,6 +9,8 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import pl.owolny.identityprovider.domain.user.User;
 import pl.owolny.identityprovider.domain.user.UserRepository;
+import pl.owolny.identityprovider.exception.AccountLinkingRequiredException;
+import pl.owolny.identityprovider.federation.FederatedAuth;
 import pl.owolny.identityprovider.federation.FederatedProvider;
 
 import java.util.Map;
@@ -32,32 +34,30 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         OAuth2UserMapper mapper = getMapper(userRequest.getClientRegistration().getRegistrationId());
 
-        Optional<User> user = this.userRepository.findByFederatedIdentityAccounts_ProviderAndFederatedIdentityAccounts_FederatedIdentityId(
+        Optional<User> userOpt = this.userRepository.findByFederatedIdentityAccounts_ProviderAndFederatedIdentityAccounts_FederatedIdentityId(
                 FederatedProvider.valueOf(userRequest.getClientRegistration().getRegistrationId().toUpperCase()),
                 oAuth2User.getName()
         );
 
-//        Optional<UserDto> user = Optional.of(UserDto.builder()
-//                .id(UUID.randomUUID())
-//                .email("test@test.com")
-//                .username("testuser")
-//                .createdAt(Instant.now().getEpochSecond())
-//                .isActive(true)
-//                .rolesDto(new HashSet<>(Set.of(new UserDto.roleDto(UUID.randomUUID(), "USER", Set.of(new UserDto.AuthorityDto(UUID.randomUUID(), "AUTHORITY_SMF"))))))
-//                .build()
-//        );
-
-        if (user.isPresent()) {
+        if (userOpt.isPresent()) {
             log.info("Account linked with that federated account already exists");
-            return mapper.map(user.get(), userRequest);
+            return mapper.map(userOpt.get(), userRequest);
         }
 
-        String email = oAuth2User.getAttribute("email");
-        user = this.userRepository.findByEmail(email);
+        FederatedAuth federatedAuth = (FederatedAuth) mapper.map(oAuth2User, userRequest);
+        String email = federatedAuth.getEmail();
+        userOpt = this.userRepository.findByEmail(email);
 
-        if (user.isPresent()) {
+        if (userOpt.isPresent()) {
             log.info("Account with email {} already exists but does not have linked account", email);
-            return mapper.map(user.get(), userRequest);
+            User user = userOpt.get();
+            if (user.getEmail() != null && user.isEmailVerified()) {
+                log.info("Account with email {} already exists and is verified", email);
+                log.info("Linking account with federated account");
+                return mapper.map(user, userRequest);
+            }
+            log.info("Account with email {} already exists but is not verified", email);
+            throw new AccountLinkingRequiredException(federatedAuth, user);
         }
 
         log.info("Account with email {} does not exist", email);

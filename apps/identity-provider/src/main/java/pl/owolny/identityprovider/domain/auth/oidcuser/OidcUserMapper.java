@@ -6,6 +6,7 @@ import pl.owolny.identityprovider.domain.user.User;
 public interface OidcUserMapper {
 
     /**
+     * USER DOES NOT HAVE ACCOUNT
      * Creates new CustomOidcUser which will be saved in database as a new user
      *
      * @return OidcUser
@@ -13,6 +14,7 @@ public interface OidcUserMapper {
     OidcUser map(OidcUser oidcUser);
 
     /**
+     * USER HAS ACCOUNT WITH SAME EMAIL
      * Maps existing user to CustomOidcUser due to the fact that user already has linked account
      *
      * @return OidcUser

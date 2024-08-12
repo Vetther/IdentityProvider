@@ -74,13 +74,14 @@ class UserRepositoryInit {
 
         // Tworzymy obiekt User
         User user = User.builder()
-                .email("test@email.com")
+                .email("osk4r.wolny@gmail.com")
                 .username("test")
                 .credentials(credentials)
                 .profile(userProfile)
                 .roles(Set.of(userRole, adminRole))
                 .createdAt(LocalDateTime.now())
                 .isActive(true)
+                .isEmailVerified(false)
                 .build();
 
         // Ustawiamy relację dwukierunkową

@@ -10,15 +10,19 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
+import org.springframework.security.oauth2.client.web.AuthorizationRequestRepository;
+import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
+import pl.owolny.identityprovider.config.handler.CustomAuthorizationRequestRepository;
 import pl.owolny.identityprovider.domain.auth.oauth2user.CustomOAuth2UserService;
 import pl.owolny.identityprovider.domain.auth.oidcuser.CustomOidcUserService;
 import pl.owolny.identityprovider.domain.auth.user.CustomUserDetailsService;
 import pl.owolny.identityprovider.domain.user.UserRepository;
 import pl.owolny.identityprovider.domain.user.UserService;
 import pl.owolny.identityprovider.federation.FederatedIdentityAuthenticationSuccessHandler;
+import pl.owolny.identityprovider.federation.FederatedIdentityFailureHandler;
 import pl.owolny.identityprovider.federation.OAuth2UserHandler;
 
 @EnableWebSecurity
@@ -30,13 +34,15 @@ public class SecurityConfig {
     private final CustomOidcUserService customOidcUserService;
     private final CustomOAuth2UserService customOAuth2UserService;
     private final CustomUserDetailsService customUserDetailsService;
+    private final FederatedIdentityFailureHandler authenticationFailureHandler;
 
-    public SecurityConfig(UserRepository userRepository, UserService userService, CustomOidcUserService customOidcUserService, CustomOAuth2UserService customOAuth2UserService, CustomUserDetailsService customUserDetailsService) {
+    public SecurityConfig(UserRepository userRepository, UserService userService, CustomOidcUserService customOidcUserService, CustomOAuth2UserService customOAuth2UserService, CustomUserDetailsService customUserDetailsService, FederatedIdentityFailureHandler authenticationFailureHandler) {
         this.userRepository = userRepository;
         this.userService = userService;
         this.customOidcUserService = customOidcUserService;
         this.customOAuth2UserService = customOAuth2UserService;
         this.customUserDetailsService = customUserDetailsService;
+        this.authenticationFailureHandler = authenticationFailureHandler;
     }
 
     @Bean
@@ -53,6 +59,7 @@ public class SecurityConfig {
                                 .requestMatchers("/test3").permitAll()
                                 .requestMatchers("/login").permitAll()
                                 .requestMatchers("/logout").permitAll()
+                                .requestMatchers("/link-accounts/**").permitAll()
                                 .anyRequest().authenticated()
                 )
                 .sessionManagement(sessionManagement ->
@@ -67,14 +74,24 @@ public class SecurityConfig {
                         oauth2Login
                                 .loginPage("/login")
                                 .successHandler(authenticationSuccessHandler())
+                                .failureHandler(authenticationFailureHandler)
                                 .userInfoEndpoint(userInfoEndpoint ->
                                         userInfoEndpoint
                                                 .oidcUserService(this.customOidcUserService)
                                                 .userService(this.customOAuth2UserService)
                                 )
+                                .authorizationEndpoint(authorizationEndpoint ->
+                                        authorizationEndpoint
+                                                .authorizationRequestRepository(authorizationRequestRepository())
+                                )
                 )
                 .authenticationProvider(authenticationProvider())
                 .build();
+    }
+
+    @Bean
+    public AuthorizationRequestRepository<OAuth2AuthorizationRequest> authorizationRequestRepository() {
+        return new CustomAuthorizationRequestRepository();
     }
 
 //    @Bean
