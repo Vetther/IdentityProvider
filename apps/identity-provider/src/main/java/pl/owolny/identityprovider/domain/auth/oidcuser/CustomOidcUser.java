@@ -1,62 +1,66 @@
 package pl.owolny.identityprovider.domain.auth.oidcuser;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.AuthorityUtils;
-import org.springframework.security.oauth2.core.oidc.IdTokenClaimNames;
 import org.springframework.security.oauth2.core.oidc.OidcIdToken;
 import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
-import org.springframework.security.oauth2.core.oidc.user.DefaultOidcUser;
+import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import pl.owolny.identityprovider.federation.FederatedAuth;
 import pl.owolny.identityprovider.federation.FederatedProvider;
 
 import java.time.Instant;
-import java.util.Collection;
-import java.util.HashSet;
-import java.util.UUID;
+import java.util.*;
 
 @Getter
 @Setter
-@JsonDeserialize
-@JsonSerialize
-class CustomOidcUser extends DefaultOidcUser implements FederatedAuth {
+@AllArgsConstructor
+@Builder
+public class CustomOidcUser implements OidcUser, FederatedAuth {
 
     private UUID id;
     private boolean isActive;
+    private boolean isEmailVerified;
     private Instant createdAt;
     private String username;
     private String email;
     private String avatarUrl;
+    private String federatedIdentityId;
     private FederatedProvider federatedProvider;
-    private Collection<? extends GrantedAuthority> authorities = new HashSet<>();
+    private Collection<? extends GrantedAuthority> authorities = new ArrayList<>();
+    private Map<String, Object> attributes = new HashMap<>();
 
-    @JsonCreator
-    public CustomOidcUser(@JsonProperty("authorities") Collection<? extends GrantedAuthority> authorities,
-                          @JsonProperty("idToken") OidcIdToken oidcIdToken,
-                          @JsonProperty("oidcUserInfo") OidcUserInfo oidcUserInfo) {
-        super(AuthorityUtils.NO_AUTHORITIES, oidcIdToken, oidcUserInfo, IdTokenClaimNames.SUB);
+    public CustomOidcUser(Collection<? extends GrantedAuthority> authorities) {
 
         if (authorities != null) {
             this.authorities = authorities;
         }
     }
 
-    public CustomOidcUser(OidcIdToken oidcIdToken, OidcUserInfo oidcUserInfo) {
-        super(AuthorityUtils.NO_AUTHORITIES, oidcIdToken, oidcUserInfo);
-    }
-
     @Override
     public String getName() {
-        return this.id != null ? this.id.toString() : super.getName();
+        return this.id != null ? this.id.toString() : null;
     }
 
     @Override
     public Collection<? extends GrantedAuthority> getAuthorities() {
         return this.authorities;
+    }
+
+    @Override
+    public Map<String, Object> getClaims() {
+        return this.attributes;
+    }
+
+    @Override
+    public OidcUserInfo getUserInfo() {
+        return null;
+    }
+
+    @Override
+    public OidcIdToken getIdToken() {
+        return null;
     }
 }

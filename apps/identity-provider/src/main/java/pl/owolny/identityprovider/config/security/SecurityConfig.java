@@ -16,20 +16,23 @@ import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
 import pl.owolny.identityprovider.domain.auth.oauth2user.CustomOAuth2UserService;
 import pl.owolny.identityprovider.domain.auth.oidcuser.CustomOidcUserService;
 import pl.owolny.identityprovider.domain.auth.user.CustomUserDetailsService;
+import pl.owolny.identityprovider.domain.user.UserRepository;
 import pl.owolny.identityprovider.domain.user.UserService;
 import pl.owolny.identityprovider.federation.FederatedIdentityAuthenticationSuccessHandler;
-import pl.owolny.identityprovider.federation.UserRepositoryOAuth2UserHandler;
+import pl.owolny.identityprovider.federation.OAuth2UserHandler;
 
 @EnableWebSecurity
 @Configuration
 public class SecurityConfig {
 
+    private final UserRepository userRepository;
     private final UserService userService;
     private final CustomOidcUserService customOidcUserService;
     private final CustomOAuth2UserService customOAuth2UserService;
     private final CustomUserDetailsService customUserDetailsService;
 
-    public SecurityConfig(UserService userService, CustomOidcUserService customOidcUserService, CustomOAuth2UserService customOAuth2UserService, CustomUserDetailsService customUserDetailsService) {
+    public SecurityConfig(UserRepository userRepository, UserService userService, CustomOidcUserService customOidcUserService, CustomOAuth2UserService customOAuth2UserService, CustomUserDetailsService customUserDetailsService) {
+        this.userRepository = userRepository;
         this.userService = userService;
         this.customOidcUserService = customOidcUserService;
         this.customOAuth2UserService = customOAuth2UserService;
@@ -111,8 +114,8 @@ public class SecurityConfig {
     }
 
     @Bean
-    UserRepositoryOAuth2UserHandler userRepositoryOAuth2UserHandler() {
-        return new UserRepositoryOAuth2UserHandler(this.userService);
+    OAuth2UserHandler userRepositoryOAuth2UserHandler() {
+        return new OAuth2UserHandler(this.userService, this.userRepository);
     }
 
     private AuthenticationSuccessHandler authenticationSuccessHandler() {

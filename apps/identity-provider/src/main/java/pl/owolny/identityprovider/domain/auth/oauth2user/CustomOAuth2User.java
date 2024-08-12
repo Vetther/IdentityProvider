@@ -1,15 +1,11 @@
 package pl.owolny.identityprovider.domain.auth.oauth2user;
 
-import com.fasterxml.jackson.annotation.JsonCreator;
-import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
-import com.fasterxml.jackson.annotation.JsonProperty;
-import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
-import com.fasterxml.jackson.databind.annotation.JsonSerialize;
+import lombok.AllArgsConstructor;
+import lombok.Builder;
 import lombok.Getter;
 import lombok.Setter;
 import org.springframework.security.core.GrantedAuthority;
-import org.springframework.security.core.authority.AuthorityUtils;
-import org.springframework.security.oauth2.core.user.DefaultOAuth2User;
+import org.springframework.security.oauth2.core.user.OAuth2User;
 import pl.owolny.identityprovider.federation.FederatedAuth;
 import pl.owolny.identityprovider.federation.FederatedProvider;
 
@@ -18,53 +14,32 @@ import java.util.*;
 
 @Getter
 @Setter
-@JsonDeserialize
-@JsonSerialize
-@JsonIgnoreProperties({"attributes"})
-public class CustomOAuth2User extends DefaultOAuth2User implements FederatedAuth {
+@Builder
+@AllArgsConstructor
+public class CustomOAuth2User implements FederatedAuth, OAuth2User {
 
     private UUID id;
     private boolean isActive;
+    private boolean isEmailVerified;
     private Instant createdAt;
     private String username;
     private String email;
     private String avatarUrl;
+    private String federatedIdentityId;
     private FederatedProvider federatedProvider;
-    private Collection<? extends GrantedAuthority> authorities = new HashSet<>();
+    private Collection<? extends GrantedAuthority> authorities = new ArrayList<>();
+    private Map<String, Object> attributes = new HashMap<>();
 
-    @JsonCreator
-    @JsonIgnoreProperties({"attributes"})
-    public CustomOAuth2User(@JsonProperty("authorities") Collection<? extends GrantedAuthority> authorities,
-                            @JsonProperty("attributes") Map<String, Object> attributes) {
-        super(AuthorityUtils.NO_AUTHORITIES, attributes, "sub");
+    public CustomOAuth2User(Collection<? extends GrantedAuthority> authorities) {
 
         if (authorities != null) {
             this.authorities = authorities;
         }
-    }
-
-    public CustomOAuth2User(Collection<? extends GrantedAuthority> authorities,
-                            Map<String, Object> attributes,
-                            String attributeNameKey) {
-        super(AuthorityUtils.NO_AUTHORITIES, createAttributes(attributes, attributeNameKey), "sub");
-
-        if (authorities != null) {
-            this.authorities = authorities;
-        }
-    }
-
-    private static Map<String, Object> createAttributes(Map<String, Object> attributes, String attributeNameKey) {
-        if (attributes == null) {
-            return new HashMap<>();
-        }
-        HashMap<String, Object> attributesMap = new HashMap<>(attributes);
-        attributesMap.put("sub", attributes.get(attributeNameKey));
-        return attributesMap;
     }
 
     @Override
     public String getName() {
-        return this.id != null ? this.id.toString() : super.getName();
+        return this.id != null ? this.id.toString() : null;
     }
 
     @Override

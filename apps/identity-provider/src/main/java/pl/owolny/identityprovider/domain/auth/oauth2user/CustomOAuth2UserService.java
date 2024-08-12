@@ -49,7 +49,7 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         if (user.isPresent()) {
             log.info("Account linked with that federated account already exists");
-            return mapper.map(user.get());
+            return mapper.map(user.get(), userRequest);
         }
 
         String email = oAuth2User.getAttribute("email");
@@ -57,11 +57,11 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
 
         if (user.isPresent()) {
             log.info("Account with email {} already exists but does not have linked account", email);
-            return mapper.map(user.get());
+            return mapper.map(user.get(), userRequest);
         }
 
         log.info("Account with email {} does not exist", email);
-        return mapper.map(oAuth2User);
+        return mapper.map(oAuth2User, userRequest);
     }
 
     private OAuth2UserMapper getMapper(String registrationId) {

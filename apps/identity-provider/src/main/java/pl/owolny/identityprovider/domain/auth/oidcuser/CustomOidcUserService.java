@@ -36,19 +36,9 @@ public class CustomOidcUserService extends OidcUserService {
                 oidcUser.getName()
         );
 
-//        Optional<UserDto> user = Optional.of(UserDto.builder()
-//                .id(UUID.randomUUID())
-//                .email("test@test.com")
-//                .username("testuser")
-//                .createdAt(Instant.now().getEpochSecond())
-//                .isActive(true)
-//                .rolesDto(new HashSet<>(Set.of(new UserDto.roleDto(UUID.randomUUID(), "USER", Set.of(new UserDto.AuthorityDto(UUID.randomUUID(), "AUTHORITY_SMF"))))))
-//                .build()
-//        );
-
         if (user.isPresent()) {
             log.info("Account linked with that federated account already exists");
-            return mapper.map(oidcUser.getIdToken(), oidcUser.getUserInfo(), user.get());
+            return mapper.map(user.get());
         }
 
         String email = userRequest.getIdToken().getEmail();
@@ -56,7 +46,7 @@ public class CustomOidcUserService extends OidcUserService {
 
         if (user.isPresent()) {
             log.info("Account with email {} already exists but does not have linked account", email);
-            return mapper.map(oidcUser.getIdToken(), oidcUser.getUserInfo(), user.get());
+            return mapper.map(user.get());
         }
 
         log.info("Account with email {} does not exist", email);

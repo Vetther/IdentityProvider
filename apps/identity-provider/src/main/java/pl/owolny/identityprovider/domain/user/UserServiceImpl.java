@@ -2,10 +2,11 @@ package pl.owolny.identityprovider.domain.user;
 
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.stereotype.Service;
-import pl.owolny.identityprovider.domain.auth.FederatedIdentityAccount;
 import pl.owolny.identityprovider.domain.authority.RoleService;
+import pl.owolny.identityprovider.domain.federatedidentity.FederatedIdentityAccount;
 
 import java.util.Set;
+import java.util.UUID;
 
 @Service
 @Slf4j
@@ -20,8 +21,9 @@ class UserServiceImpl implements UserService {
     }
 
     @Override
-    public User createFromFederatedAccount(String username, String email, boolean isActive, boolean isEmailVerified, UserProfile profile, FederatedIdentityAccount federatedIdentityAccount) {
+    public User createFromFederatedAccount(UUID id, String username, String email, boolean isActive, boolean isEmailVerified, UserProfile profile, FederatedIdentityAccount federatedIdentityAccount) {
         User user = User.builder()
+                .id(id)
                 .username(username)
                 .email(email)
                 .roles(Set.of(this.roleService.getDefaulRole()))

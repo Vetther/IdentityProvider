@@ -4,9 +4,9 @@ import jakarta.persistence.*;
 import lombok.*;
 import org.hibernate.annotations.CreationTimestamp;
 import org.hibernate.annotations.UpdateTimestamp;
-import pl.owolny.identityprovider.domain.auth.FederatedIdentityAccount;
 import pl.owolny.identityprovider.domain.authority.Role;
 import pl.owolny.identityprovider.domain.credentials.Credentials;
+import pl.owolny.identityprovider.domain.federatedidentity.FederatedIdentityAccount;
 
 import java.io.Serializable;
 import java.time.LocalDateTime;

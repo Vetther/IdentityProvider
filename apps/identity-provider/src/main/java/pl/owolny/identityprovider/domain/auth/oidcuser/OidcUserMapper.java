@@ -1,7 +1,5 @@
 package pl.owolny.identityprovider.domain.auth.oidcuser;
 
-import org.springframework.security.oauth2.core.oidc.OidcIdToken;
-import org.springframework.security.oauth2.core.oidc.OidcUserInfo;
 import org.springframework.security.oauth2.core.oidc.user.OidcUser;
 import pl.owolny.identityprovider.domain.user.User;
 
@@ -19,5 +17,5 @@ public interface OidcUserMapper {
      *
      * @return OidcUser
      */
-    OidcUser map(OidcIdToken idToken, OidcUserInfo userInfo, User user);
+    OidcUser map(User user);
 }

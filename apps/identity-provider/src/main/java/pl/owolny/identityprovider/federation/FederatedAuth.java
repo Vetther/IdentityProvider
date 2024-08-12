@@ -12,6 +12,8 @@ public interface FederatedAuth {
 
     void setId(UUID id);
 
+    String getFederatedIdentityId();
+
     FederatedProvider getFederatedProvider();
 
     String getAvatarUrl();
@@ -21,6 +23,8 @@ public interface FederatedAuth {
     Collection<? extends GrantedAuthority> getAuthorities();
 
     boolean isActive();
+
+    boolean isEmailVerified();
 
     String getUsername();
 

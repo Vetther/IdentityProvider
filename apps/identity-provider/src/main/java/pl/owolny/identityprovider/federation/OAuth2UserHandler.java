@@ -5,23 +5,25 @@ import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.core.GrantedAuthority;
 import org.springframework.security.core.authority.SimpleGrantedAuthority;
 import org.springframework.security.oauth2.core.user.OAuth2User;
-import pl.owolny.identityprovider.domain.auth.FederatedIdentityAccount;
+import pl.owolny.identityprovider.domain.federatedidentity.FederatedIdentityAccount;
 import pl.owolny.identityprovider.domain.user.User;
 import pl.owolny.identityprovider.domain.user.UserProfile;
+import pl.owolny.identityprovider.domain.user.UserRepository;
 import pl.owolny.identityprovider.domain.user.UserService;
 
 import java.util.Collection;
-import java.util.Set;
+import java.util.List;
 import java.util.function.BiConsumer;
-import java.util.stream.Collectors;
 
 @Slf4j
-public class UserRepositoryOAuth2UserHandler implements BiConsumer<OAuth2User, FederatedProvider> {
+public class OAuth2UserHandler implements BiConsumer<OAuth2User, FederatedProvider> {
 
     private final UserService userService;
+    private final UserRepository userRepository;
 
-    public UserRepositoryOAuth2UserHandler(UserService userService) {
+    public OAuth2UserHandler(UserService userService, UserRepository userRepository) {
         this.userService = userService;
+        this.userRepository = userRepository;
     }
 
     @Override
@@ -35,18 +37,19 @@ public class UserRepositoryOAuth2UserHandler implements BiConsumer<OAuth2User, F
         log.info("createdAt: {}", federatedAuth.getCreatedAt());
         log.info("avatar: {}", federatedAuth.getAvatarUrl());
         log.info("provider: {}", federatedProvider);
-        log.info("providerId: {}", oAuth2User.getName());
+        log.info("providerId: {}", federatedAuth.getFederatedIdentityId());
 
         // check if user already exists
-        if (federatedAuth.getId() != null) {
+        if (this.userRepository.findById(federatedAuth.getId()).isPresent()) {
             return;
         }
 
         User user = this.userService.createFromFederatedAccount(
+                federatedAuth.getId(),
                 federatedAuth.getUsername(),
                 federatedAuth.getEmail(),
                 federatedAuth.isActive(),
-                true, // TODO
+                federatedAuth.isEmailVerified(),
                 UserProfile.builder()
                         .avatarUrl(federatedAuth.getAvatarUrl())
                         .firstName(null) // TODO
@@ -57,22 +60,21 @@ public class UserRepositoryOAuth2UserHandler implements BiConsumer<OAuth2User, F
                         .build(),
                 FederatedIdentityAccount.builder()
                         .username(federatedAuth.getUsername())
-                        .federatedIdentityId(oAuth2User.getName())
-                        .provider(federatedProvider)
+                        .federatedIdentityId(federatedAuth.getFederatedIdentityId())
+                        .provider(federatedAuth.getFederatedProvider())
                         .email(federatedAuth.getEmail())
-                        .isEmailVerified(true) // TODO
+                        .isEmailVerified(federatedAuth.isEmailVerified())
                         .build()
         );
 
         Collection<GrantedAuthority> grantedAuthorities = (Collection<GrantedAuthority>) oAuth2User.getAuthorities();
 
         if (!CollectionUtils.isEmpty(user.getRoles())) {
-            Set<? extends GrantedAuthority> authorities = user.getRoles().stream()
+            List<? extends GrantedAuthority> authorities = user.getRoles().stream()
                     .flatMap(role -> role.getAuthorities().stream()
                             .map(authority -> new SimpleGrantedAuthority(authority.getName()))
                     )
-                    .collect(Collectors.toSet());
-
+                    .toList();
             grantedAuthorities.addAll(authorities);
         }
 

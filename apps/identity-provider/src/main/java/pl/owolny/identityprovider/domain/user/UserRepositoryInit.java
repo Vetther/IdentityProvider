@@ -4,12 +4,12 @@ import jakarta.annotation.PostConstruct;
 import lombok.extern.slf4j.Slf4j;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Component;
-import pl.owolny.identityprovider.domain.auth.FederatedIdentityAccount;
 import pl.owolny.identityprovider.domain.authority.Authority;
 import pl.owolny.identityprovider.domain.authority.AuthorityRepository;
 import pl.owolny.identityprovider.domain.authority.Role;
 import pl.owolny.identityprovider.domain.authority.RoleRepository;
 import pl.owolny.identityprovider.domain.credentials.Credentials;
+import pl.owolny.identityprovider.domain.federatedidentity.FederatedIdentityAccount;
 import pl.owolny.identityprovider.federation.FederatedProvider;
 import pl.owolny.identityprovider.utils.countrycode.CountryCode;
 

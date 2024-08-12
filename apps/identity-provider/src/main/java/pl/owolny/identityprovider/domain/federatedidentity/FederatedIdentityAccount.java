@@ -1,4 +1,4 @@
-package pl.owolny.identityprovider.domain.auth;
+package pl.owolny.identityprovider.domain.federatedidentity;
 
 import jakarta.persistence.*;
 import lombok.*;
