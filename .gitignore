@@ -42,5 +42,6 @@ bin/
 ### ENV ###
 **/env.properties
 
-/apps/monitoring/grafana/var
-/apps/monitoring/tempo/tempo-data
+/apps/docker/grafana/var
+/apps/docker/rabbitmq/rabbit-data
+/apps/docker/tempo/tempo-data
