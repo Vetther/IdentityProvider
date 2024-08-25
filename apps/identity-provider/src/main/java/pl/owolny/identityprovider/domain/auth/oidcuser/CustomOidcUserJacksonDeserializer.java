@@ -1,4 +1,4 @@
-package pl.owolny.identityprovider.domain.auth.user;
+package pl.owolny.identityprovider.domain.auth.oidcuser;
 
 import com.fasterxml.jackson.core.JsonParser;
 import com.fasterxml.jackson.databind.DeserializationContext;
@@ -12,10 +12,10 @@ import java.io.IOException;
 import java.util.List;
 import java.util.UUID;
 
-public class CustomUserDetailsDeserializer extends JsonDeserializer<CustomUserDetails> {
+public class CustomOidcUserJacksonDeserializer extends JsonDeserializer<CustomOidcUser> {
 
     @Override
-    public CustomUserDetails deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
+    public CustomOidcUser deserialize(JsonParser jsonParser, DeserializationContext deserializationContext) throws IOException {
         ObjectMapper mapper = (ObjectMapper) jsonParser.getCodec();
         JsonNode jsonNode = mapper.readTree(jsonParser);
 
@@ -23,7 +23,7 @@ public class CustomUserDetailsDeserializer extends JsonDeserializer<CustomUserDe
         boolean isActive = readJsonNode(jsonNode, "isActive").asBoolean();
         List<GrantedAuthority> authorities = mapper.readerForListOf(GrantedAuthority.class).readValue(jsonNode.get("authorities"));
 
-        return CustomUserDetails.builder()
+        return CustomOidcUser.builder()
                 .id(UUID.fromString(id))
                 .authorities(authorities)
                 .isActive(isActive)

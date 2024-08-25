@@ -1,6 +1,7 @@
 import io.gatling.gradle.LogHttp
 
 dependencies {
+    implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-client")
     implementation("org.springframework.boot:spring-boot-starter-data-jpa")
     implementation("org.springframework.boot:spring-boot-starter-jdbc")
@@ -12,15 +13,20 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-web")
     implementation("org.springframework.boot:spring-boot-starter-security")
     implementation("org.springframework.boot:spring-boot-starter-oauth2-authorization-server")
-    implementation("org.springframework.boot:spring-boot-starter-thymeleaf")
     implementation("org.springframework.boot:spring-boot-starter-validation")
     implementation("com.github.ua-parser:uap-java:1.6.1")
+    implementation("org.springframework.boot:spring-boot-starter-data-redis")
     runtimeOnly("org.postgresql:postgresql")
 
+
+    // Gatling
     gatlingImplementation("com.google.guava:guava:33.1.0-jre")
     gatlingImplementation("org.apache.commons:commons-lang3:3.14.0")
     gatlingCompileOnly("org.projectlombok:lombok")
     gatlingAnnotationProcessor("org.projectlombok:lombok")
+
+    // Subprojects
+    implementation(project(":mail-service"))
 }
 
 plugins {

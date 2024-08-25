@@ -56,14 +56,12 @@ class UserRepositoryInit {
 
         log.info("Roles and authorities registered");
         log.info("Registering default user");
-        // Tworzymy obiekt UserProfile
         UserProfile userProfile = UserProfile.builder()
                 .gender("MALE")
                 .avatarUrl("https://www.google.com")
                 .countryCode(new CountryCode("PL"))
                 .build();
 
-        // Tworzymy obiekt ExternalIdentityAccount
         FederatedIdentityAccount externalAccount = FederatedIdentityAccount.builder()
                 .federatedIdentityId("googleid-123123")
                 .username("test-google")
@@ -72,7 +70,6 @@ class UserRepositoryInit {
                 .isEmailVerified(true)
                 .build();
 
-        // Tworzymy obiekt User
         User user = User.builder()
                 .email("osk4r.wolny@gmail.com")
                 .username("test")
@@ -84,13 +81,11 @@ class UserRepositoryInit {
                 .isEmailVerified(false)
                 .build();
 
-        // Ustawiamy relację dwukierunkową
         userProfile.setUser(user);
         externalAccount.setUser(user);
         credentials.setUser(user);
         user.setFederatedIdentityAccounts(Set.of(externalAccount));
 
-        // Zapisujemy użytkownika
         userRepository.save(user);
     }
 }

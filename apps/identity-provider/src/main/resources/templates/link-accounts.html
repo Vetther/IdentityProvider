@@ -6,14 +6,12 @@
 <body>
 <main class="container">
     <h1>Link Your Accounts</h1>
-    <p>We've found an existing account with the email: <span th:text="${email}"></span></p>
+    <p>We've found an existing account (<span th:text="${username}"></span>) with your email: <span th:text="${email}"></span></p>
     <p>Would you like to link this account with your <span th:text="${provider}"></span> account?</p>
 
-    <form th:action="@{/link-accounts}" method="post">
-        <input type="hidden" name="email" th:value="${email}" />
-        <input type="hidden" name="provider" th:value="${provider}" />
+    <form method="post" hx-post="/link-accounts" hx-trigger="submit" hx-target=".container" hx-swap="innerHTML">
         <button type="submit" name="action" value="link">Yes, link accounts</button>
-        <button type="submit" name="action" value="decline">No, keep them separate</button>
+        <button type="submit" name="action" value="decline">No, cancel login</button>
     </form>
 </main>
 </body>

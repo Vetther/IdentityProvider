@@ -8,7 +8,6 @@ import org.springframework.security.oauth2.core.user.OAuth2User;
 import pl.owolny.identityprovider.domain.federatedidentity.FederatedIdentityAccount;
 import pl.owolny.identityprovider.domain.user.User;
 import pl.owolny.identityprovider.domain.user.UserProfile;
-import pl.owolny.identityprovider.domain.user.UserRepository;
 import pl.owolny.identityprovider.domain.user.UserService;
 
 import java.util.Collection;
@@ -19,11 +18,9 @@ import java.util.function.BiConsumer;
 public class OAuth2UserHandler implements BiConsumer<OAuth2User, FederatedProvider> {
 
     private final UserService userService;
-    private final UserRepository userRepository;
 
-    public OAuth2UserHandler(UserService userService, UserRepository userRepository) {
+    public OAuth2UserHandler(UserService userService) {
         this.userService = userService;
-        this.userRepository = userRepository;
     }
 
     @Override
@@ -40,7 +37,7 @@ public class OAuth2UserHandler implements BiConsumer<OAuth2User, FederatedProvid
         log.info("providerId: {}", federatedAuth.getFederatedIdentityId());
 
         // check if user already exists
-        if (this.userRepository.findById(federatedAuth.getId()).isPresent()) {
+        if (this.userService.existsById(federatedAuth.getId())) {
             return;
         }
 

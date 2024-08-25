@@ -15,3 +15,11 @@ scrape_configs:
         labels:
           application: 'Identity Provider Application'
           instance_name: 'identity-provider'
+
+  - job_name: 'mail_service'
+    metrics_path: '/actuator/prometheus'
+    static_configs:
+      - targets: [ 'mail-service:8082' ]
+        labels:
+          application: 'Mail Service Application'
+          instance_name: 'mail-service'

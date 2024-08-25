@@ -17,7 +17,7 @@ public class FederatedIdentityAccountService {
         this.federatedIdentityAccountRepository = federatedIdentityAccountRepository;
     }
 
-    public FederatedIdentityAccount create(UUID userId, String federatedIdentityId, FederatedProvider federatedProvider, String federatedEmail, String federatedUsername) {
+    public void create(UUID userId, String federatedIdentityId, FederatedProvider federatedProvider, String federatedEmail, String federatedUsername) {
         FederatedIdentityAccount federatedIdentityAccount = FederatedIdentityAccount.builder()
                 .user(User.builder().id(userId).build())
                 .federatedIdentityId(federatedIdentityId)
@@ -25,6 +25,6 @@ public class FederatedIdentityAccountService {
                 .username(federatedUsername)
                 .email(federatedEmail)
                 .build();
-        return federatedIdentityAccountRepository.save(federatedIdentityAccount);
+        federatedIdentityAccountRepository.save(federatedIdentityAccount);
     }
 }

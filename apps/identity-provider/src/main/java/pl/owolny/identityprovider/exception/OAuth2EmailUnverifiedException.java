@@ -7,13 +7,13 @@ import pl.owolny.identityprovider.domain.user.User;
 import pl.owolny.identityprovider.federation.FederatedAuth;
 
 @Getter
-public class AccountLinkingRequiredException extends OAuth2AuthenticationException {
+public class OAuth2EmailUnverifiedException extends OAuth2AuthenticationException {
 
-    public static String ERROR_CODE = "account_linking_required";
+    public static String ERROR_CODE = "email_verification_required";
     private final FederatedAuth federatedAuth;
     private final User existingUser;
 
-    public AccountLinkingRequiredException(FederatedAuth federatedAuth, User existingUser) {
+    public OAuth2EmailUnverifiedException(FederatedAuth federatedAuth, User existingUser) {
         super(ERROR_CODE);
         this.federatedAuth = federatedAuth;
         this.existingUser = existingUser;

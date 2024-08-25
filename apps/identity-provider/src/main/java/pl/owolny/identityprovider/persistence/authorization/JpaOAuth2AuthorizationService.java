@@ -22,11 +22,11 @@ import org.springframework.stereotype.Component;
 import org.springframework.util.Assert;
 import org.springframework.util.StringUtils;
 import pl.owolny.identityprovider.domain.auth.oauth2user.CustomOAuth2User;
-import pl.owolny.identityprovider.domain.auth.oauth2user.CustomOAuth2UserMixin;
+import pl.owolny.identityprovider.domain.auth.oauth2user.CustomOAuth2UserJacksonMixin;
 import pl.owolny.identityprovider.domain.auth.oidcuser.CustomOidcUser;
-import pl.owolny.identityprovider.domain.auth.oidcuser.CustomOidcUserMixin;
+import pl.owolny.identityprovider.domain.auth.oidcuser.CustomOidcUserJacksonMixin;
 import pl.owolny.identityprovider.domain.auth.user.CustomUserDetails;
-import pl.owolny.identityprovider.domain.auth.user.CustomUserDetailsMixin;
+import pl.owolny.identityprovider.domain.auth.user.CustomUserDetailsJacksonMixin;
 
 import java.time.Instant;
 import java.util.List;
@@ -52,9 +52,9 @@ class JpaOAuth2AuthorizationService implements OAuth2AuthorizationService {
         List<Module> securityModules = SecurityJackson2Modules.getModules(classLoader);
         this.objectMapper.registerModules(securityModules);
         this.objectMapper.registerModule(new OAuth2AuthorizationServerJackson2Module());
-        this.objectMapper.addMixIn(CustomUserDetails.class, CustomUserDetailsMixin.class);
-        this.objectMapper.addMixIn(CustomOAuth2User.class, CustomOAuth2UserMixin.class);
-        this.objectMapper.addMixIn(CustomOidcUser.class, CustomOidcUserMixin.class);
+        this.objectMapper.addMixIn(CustomUserDetails.class, CustomUserDetailsJacksonMixin.class);
+        this.objectMapper.addMixIn(CustomOAuth2User.class, CustomOAuth2UserJacksonMixin.class);
+        this.objectMapper.addMixIn(CustomOidcUser.class, CustomOidcUserJacksonMixin.class);
 
     }
 

@@ -12,5 +12,5 @@ public class MonitoringActions {
     public static final String LOGIN_PATH = "localhost:9000";
 
     public static final HttpRequestActionBuilder TEST_EXAMPLE_ACTION = http(LOGIN_PATH)
-            .get("/oauth2/authorization/google");
+            .get("/login");
 }

@@ -1,4 +1,4 @@
-package pl.owolny.identityprovider.domain.auth.oidcuser;
+package pl.owolny.identityprovider.domain.auth.user;
 
 import com.fasterxml.jackson.annotation.JsonAutoDetect;
 import com.fasterxml.jackson.annotation.JsonIgnoreProperties;
@@ -11,6 +11,6 @@ import com.fasterxml.jackson.databind.annotation.JsonDeserialize;
         getterVisibility = JsonAutoDetect.Visibility.NONE,
         isGetterVisibility = JsonAutoDetect.Visibility.NONE)
 @JsonIgnoreProperties(ignoreUnknown = true)
-@JsonDeserialize(using = CustomOidcUserDeserializer.class)
-public class CustomOidcUserMixin {
+@JsonDeserialize(using = CustomUserDetailsJacksonDeserializer.class)
+public class CustomUserDetailsJacksonMixin {
 }

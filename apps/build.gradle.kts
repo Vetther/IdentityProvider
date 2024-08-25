@@ -40,6 +40,7 @@ subprojects {
         annotationProcessor("org.projectlombok:lombok")
         implementation("org.mapstruct:mapstruct:1.5.5.Final")
         annotationProcessor("org.mapstruct:mapstruct-processor:1.5.5.Final")
+        implementation("org.springframework.boot:spring-boot-starter-amqp")
 
         // Observability
         implementation("com.github.loki4j:loki-logback-appender:1.6.0-m1")

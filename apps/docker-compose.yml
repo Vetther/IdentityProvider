@@ -11,7 +11,7 @@ services:
     ports:
       - "9090:9090"
     volumes:
-      - ./monitoring/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
+      - ./docker/prometheus/prometheus.yml:/etc/prometheus/prometheus.yml
     networks:
       - backend
 
@@ -20,12 +20,15 @@ services:
     container_name: grafana
     ports:
       - "3000:3000"
-    restart: unless-stopped
     links:
       - prometheus:prometheus
+    environment:
+      - GF_AUTH_ANONYMOUS_ENABLED=true
+      - GF_AUTH_ANONYMOUS_ORG_ROLE=Admin
+      - GF_AUTH_DISABLE_LOGIN_FORM=true
     volumes:
-      - ./monitoring/grafana/var:/var/lib/grafana
-      - ./monitoring/grafana/provisioning/datasources:/etc/grafana/provisioning/datasources:ro
+      - ./docker/grafana/var:/var/lib/grafana
+      - ./docker/grafana:/etc/grafana/provisioning/datasources:ro
     networks:
       - backend
 
@@ -41,8 +44,8 @@ services:
     image: grafana/tempo:latest
     command: [ "-config.file=/etc/tempo.yaml" ]
     volumes:
-      - ./monitoring/tempo/tempo.yml:/etc/tempo.yaml:ro
-      - ./monitoring/tempo/tempo-data:/tmp/tempo
+      - ./docker/tempo/tempo.yml:/etc/tempo.yaml:ro
+      - ./docker/tempo/tempo-data:/tmp/tempo
     ports:
       - "3110:3100"  # Tempo
       - "9411:9411" # zipkin
@@ -135,6 +138,47 @@ services:
         limits:
           memory: 1000m
           cpus: '2'
+
+  mail-service:
+    image: "vetther/apps-mail-service"
+    ports:
+      - "8082:8082"
+    environment:
+      - "spring.profiles.active=docker"
+      - JAVA_TOOL_OPTIONS=
+        -Xmx128m
+        -XX:+IdleTuningGcOnIdle
+        -XX:+IdleTuningCompactOnIdle
+        -Xtune:virtualized
+        -Xscmx128m
+        -Xscmaxaot100m
+        -Xquickstart
+        -Xshareclasses
+    networks:
+      - backend
+
+  rabbitmq:
+    image: 'rabbitmq:3-management-alpine'
+    container_name: rabbitmq
+    ports:
+      - '5672:5672'
+      - '15672:15672'
+    volumes:
+      - ./docker/rabbitmq/rabbit-data:/var/lib/rabbitmq
+      - ./docker/rabbitmq/rabbitmq.conf:/etc/rabbitmq/rabbitmq.conf:ro
+      - ./docker/rabbitmq/definitions.json:/etc/rabbitmq/definitions.json:ro
+    networks:
+      - backend
+
+  redis:
+    image: 'redis:6-alpine'
+    container_name: redis
+    ports:
+      - '6379:6379'
+    volumes:
+      - ./docker/redis/redis-data:/data
+    networks:
+      - backend
 
 networks:
   backend:

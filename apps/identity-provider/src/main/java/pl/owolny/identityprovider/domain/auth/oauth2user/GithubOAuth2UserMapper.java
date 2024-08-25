@@ -58,12 +58,11 @@ class GithubOAuth2UserMapper implements OAuth2UserMapper {
                 .defaultHeader(HttpHeaders.AUTHORIZATION, "token " + userRequest.getAccessToken().getTokenValue())
                 .build();
 
-        List<Map<String, Object>> userEmails = restClient.get()
+        return restClient.get()
                 .uri("/emails")
                 .retrieve()
                 .body(new ParameterizedTypeReference<>() {
                 });
-        return userEmails;
     }
 
     @Override

@@ -11,4 +11,12 @@ public interface UserService {
     User getByUsername(String username);
 
     User getByEmail(String email);
+
+    boolean existsByUsername(String username);
+
+    boolean existsByEmail(String email);
+
+    boolean existsById(UUID id);
+
+    boolean existsByUsernameOrEmail(String username, String email);
 }

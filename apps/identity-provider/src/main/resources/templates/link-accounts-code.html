@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html th:replace="~{layout/layout :: layout(~{::title}, ~{::main})}" xmlns:th="http://www.thymeleaf.org">
+<head>
+    <title>Łączenie kont</title>
+</head>
+<body>
+<main class="container">
+    <h1>Link Your Accounts</h1>
+    <p>Na twój adres email <span th:text="${email}"></span> został wysłany kod potwierdzający</p>
+    <p>Wpisz go poniżej</p>
+    <form hx-post="/link-accounts/code" hx-trigger="keyup delay:200ms from:#verification-code" hx-target=".container" hx-swap="innerHTML">
+        <label for="verification-code">Kod potwierdzający</label>
+        <input type="text" id="verification-code" name="code" maxlength="6" pattern="\d{6}" required
+                                                      placeholder="Wpisz 6-cyfrowy kod">
+    </form>
+    <div id="result"></div>
+</main>
+</body>
+</html>

@@ -9,7 +9,7 @@ import org.springframework.stereotype.Service;
 import org.springframework.util.Assert;
 import pl.owolny.identityprovider.domain.user.User;
 import pl.owolny.identityprovider.domain.user.UserRepository;
-import pl.owolny.identityprovider.exception.AccountLinkingRequiredException;
+import pl.owolny.identityprovider.exception.OAuth2EmailUnverifiedException;
 import pl.owolny.identityprovider.federation.FederatedAuth;
 import pl.owolny.identityprovider.federation.FederatedProvider;
 
@@ -48,20 +48,22 @@ public class CustomOAuth2UserService extends DefaultOAuth2UserService {
         String email = federatedAuth.getEmail();
         userOpt = this.userRepository.findByEmail(email);
 
-        if (userOpt.isPresent()) {
-            log.info("Account with email {} already exists but does not have linked account", email);
-            User user = userOpt.get();
-            if (user.getEmail() != null && user.isEmailVerified()) {
-                log.info("Account with email {} already exists and is verified", email);
-                log.info("Linking account with federated account");
-                return mapper.map(user, userRequest);
-            }
-            log.info("Account with email {} already exists but is not verified", email);
-            throw new AccountLinkingRequiredException(federatedAuth, user);
+        if (userOpt.isEmpty()) {
+            log.info("Account with email {} does not exist", email);
+            return mapper.map(oAuth2User, userRequest);
         }
 
-        log.info("Account with email {} does not exist", email);
-        return mapper.map(oAuth2User, userRequest);
+        log.info("Account with email {} already exists but does not have linked account", email);
+        User user = userOpt.get();
+
+        if (user.isEmailVerified()) {
+            log.info("Account with email {} already exists and is verified", email);
+            log.info("Linking account with federated account");
+            return mapper.map(user, userRequest);
+        }
+
+        log.info("Account with email {} already exists but is not verified", email);
+        throw new OAuth2EmailUnverifiedException(federatedAuth, user);
     }
 
     private OAuth2UserMapper getMapper(String registrationId) {

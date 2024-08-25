@@ -10,16 +10,12 @@ import org.springframework.security.config.annotation.web.builders.HttpSecurity;
 import org.springframework.security.config.annotation.web.configuration.EnableWebSecurity;
 import org.springframework.security.config.http.SessionCreationPolicy;
 import org.springframework.security.crypto.password.NoOpPasswordEncoder;
-import org.springframework.security.oauth2.client.web.AuthorizationRequestRepository;
-import org.springframework.security.oauth2.core.endpoint.OAuth2AuthorizationRequest;
 import org.springframework.security.web.SecurityFilterChain;
 import org.springframework.security.web.authentication.AuthenticationSuccessHandler;
 import org.springframework.validation.beanvalidation.LocalValidatorFactoryBean;
-import pl.owolny.identityprovider.config.handler.CustomAuthorizationRequestRepository;
 import pl.owolny.identityprovider.domain.auth.oauth2user.CustomOAuth2UserService;
 import pl.owolny.identityprovider.domain.auth.oidcuser.CustomOidcUserService;
 import pl.owolny.identityprovider.domain.auth.user.CustomUserDetailsService;
-import pl.owolny.identityprovider.domain.user.UserRepository;
 import pl.owolny.identityprovider.domain.user.UserService;
 import pl.owolny.identityprovider.federation.FederatedIdentityAuthenticationSuccessHandler;
 import pl.owolny.identityprovider.federation.FederatedIdentityFailureHandler;
@@ -29,15 +25,13 @@ import pl.owolny.identityprovider.federation.OAuth2UserHandler;
 @Configuration
 public class SecurityConfig {
 
-    private final UserRepository userRepository;
     private final UserService userService;
     private final CustomOidcUserService customOidcUserService;
     private final CustomOAuth2UserService customOAuth2UserService;
     private final CustomUserDetailsService customUserDetailsService;
     private final FederatedIdentityFailureHandler authenticationFailureHandler;
 
-    public SecurityConfig(UserRepository userRepository, UserService userService, CustomOidcUserService customOidcUserService, CustomOAuth2UserService customOAuth2UserService, CustomUserDetailsService customUserDetailsService, FederatedIdentityFailureHandler authenticationFailureHandler) {
-        this.userRepository = userRepository;
+    public SecurityConfig(UserService userService, CustomOidcUserService customOidcUserService, CustomOAuth2UserService customOAuth2UserService, CustomUserDetailsService customUserDetailsService, FederatedIdentityFailureHandler authenticationFailureHandler) {
         this.userService = userService;
         this.customOidcUserService = customOidcUserService;
         this.customOAuth2UserService = customOAuth2UserService;
@@ -49,18 +43,19 @@ public class SecurityConfig {
     SecurityFilterChain defaultSecurityFilterChain(HttpSecurity http) throws Exception {
         return http
                 .authorizeHttpRequests(authorize ->
-                        authorize
-                                .requestMatchers("/assets/**").permitAll()
-                                .requestMatchers("/webjars/**").permitAll()
-                                .requestMatchers("/actuator/**").permitAll()
-                                .requestMatchers("/register").permitAll()
-                                .requestMatchers("/error").permitAll()
-                                .requestMatchers("/test2").permitAll()
-                                .requestMatchers("/test3").permitAll()
-                                .requestMatchers("/login").permitAll()
-                                .requestMatchers("/logout").permitAll()
-                                .requestMatchers("/link-accounts/**").permitAll()
-                                .anyRequest().authenticated()
+                                authorize
+//                                        .requestMatchers(PathRequest.toStaticResources().atCommonLocations()).permitAll()
+                                        .requestMatchers("/css/**", "/images/**").permitAll()
+                                        .requestMatchers("/webjars/**").permitAll()
+                                        .requestMatchers("/actuator/**").permitAll()
+                                        .requestMatchers("/register").permitAll()
+                                        .requestMatchers("/error").permitAll()
+                                        .requestMatchers("/test").permitAll()
+                                        .requestMatchers("/test3").permitAll()
+                                        .requestMatchers("/login").permitAll()
+                                        .requestMatchers("/logout").permitAll()
+                                        .requestMatchers("/link-accounts/**").permitAll()
+                                        .anyRequest().authenticated()
                 )
                 .sessionManagement(sessionManagement ->
                         sessionManagement
@@ -69,6 +64,7 @@ public class SecurityConfig {
                         formLogin
                                 .loginPage("/login")
                                 .successHandler(authenticationSuccessHandler())
+                                .failureHandler(authenticationFailureHandler)
                 )
                 .oauth2Login(oauth2Login ->
                         oauth2Login
@@ -80,18 +76,9 @@ public class SecurityConfig {
                                                 .oidcUserService(this.customOidcUserService)
                                                 .userService(this.customOAuth2UserService)
                                 )
-                                .authorizationEndpoint(authorizationEndpoint ->
-                                        authorizationEndpoint
-                                                .authorizationRequestRepository(authorizationRequestRepository())
-                                )
                 )
                 .authenticationProvider(authenticationProvider())
                 .build();
-    }
-
-    @Bean
-    public AuthorizationRequestRepository<OAuth2AuthorizationRequest> authorizationRequestRepository() {
-        return new CustomAuthorizationRequestRepository();
     }
 
 //    @Bean
@@ -132,7 +119,7 @@ public class SecurityConfig {
 
     @Bean
     OAuth2UserHandler userRepositoryOAuth2UserHandler() {
-        return new OAuth2UserHandler(this.userService, this.userRepository);
+        return new OAuth2UserHandler(this.userService);
     }
 
     private AuthenticationSuccessHandler authenticationSuccessHandler() {

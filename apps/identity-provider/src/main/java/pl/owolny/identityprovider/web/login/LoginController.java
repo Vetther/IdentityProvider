@@ -10,7 +10,8 @@ public class LoginController {
     public static final String LOGIN_VIEW = "login";
 
     @GetMapping("/login")
-    public String login(@RequestParam(value = "error", required = false) String error) {
+    public String login(@RequestParam(value = "error", required = false) String error,
+                        @RequestParam(value = "success", required = false) String success) {
         return LOGIN_VIEW;
     }
 

@@ -52,4 +52,24 @@ class UserServiceImpl implements UserService {
         return this.userRepository.findByEmail(email)
                 .orElseThrow(() -> new IllegalArgumentException("User not found"));
     }
+
+    @Override
+    public boolean existsByUsername(String username) {
+        return this.userRepository.findByUsername(username).isPresent();
+    }
+
+    @Override
+    public boolean existsByEmail(String email) {
+        return this.userRepository.findByEmail(email).isPresent();
+    }
+
+    @Override
+    public boolean existsById(UUID id) {
+        return this.userRepository.findById(id).isPresent();
+    }
+
+    @Override
+    public boolean existsByUsernameOrEmail(String username, String email) {
+        return this.userRepository.findByUsernameOrEmail(username, email).isPresent();
+    }
 }

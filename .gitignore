@@ -45,3 +45,4 @@ bin/
 /apps/docker/grafana/var
 /apps/docker/rabbitmq/rabbit-data
 /apps/docker/tempo/tempo-data
+/apps/docker/redis/redis-data
