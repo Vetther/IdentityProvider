@@ -9,7 +9,7 @@
 
     <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
         <encoder>
-            <pattern>%highlight(%-5level) %cyan(%logger{15}) - %msg %n</pattern>
+            <pattern>%highlight(%-5level) %cyan(%logger{15}) --- %msg %n</pattern>
         </encoder>
     </appender>
 

@@ -1,12 +1,13 @@
 import org.springframework.boot.gradle.tasks.bundling.BootBuildImage
 
 val springCloudVersion by extra { "2023.0.3" }
-val springBootVersion by extra { "3.3.2" }
+val springBootVersion by extra { "3.3.3" }
 
 plugins {
     java
-    id("org.springframework.boot") version "3.3.2"
+    id("org.springframework.boot") version "3.3.3"
     id("io.spring.dependency-management") version "1.1.5"
+    id("org.springframework.boot.aot") version "3.3.3"
 //    id("org.graalvm.buildtools.native") version "0.10.2"
 }
 
@@ -25,6 +26,7 @@ subprojects {
     apply(plugin = "java")
     apply(plugin = "org.springframework.boot")
     apply(plugin = "io.spring.dependency-management")
+    apply(plugin = "org.springframework.boot.aot")
 //    apply(plugin = "org.graalvm.buildtools.native")
 
     java.sourceCompatibility = JavaVersion.VERSION_21
@@ -58,7 +60,13 @@ subprojects {
 
     tasks.withType<BootBuildImage> {
         imageName = "vetther/${rootProject.name}-${project.name}"
+
+        environment.put("BP_JVM_CDS_ENABLED", "true")
+        environment.put("BP_SPRING_AOT_ENABLED", "true")
+
         buildpacks = listOf("gcr.io/paketo-buildpacks/eclipse-openj9:latest", "paketo-buildpacks/java")
+//        builder.set("paketobuildpacks/builder-jammy-buildpackless-tiny")
+//        buildpacks.add("gcr.io/paketo-buildpacks/java")
     }
 
     configurations {

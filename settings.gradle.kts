@@ -1,4 +1,4 @@
-rootProject.name = "apps"
+rootProject.name = "kierowca2.0"
 
 include("identity-provider")
 include("api-gateway")

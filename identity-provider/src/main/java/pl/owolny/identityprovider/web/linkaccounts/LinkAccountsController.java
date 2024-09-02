@@ -7,6 +7,7 @@ import org.springframework.web.bind.annotation.GetMapping;
 import org.springframework.web.bind.annotation.PostMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.SessionAttribute;
+import org.springframework.web.servlet.mvc.support.RedirectAttributes;
 import pl.owolny.identityprovider.domain.federatedidentity.FederatedIdentityAccountService;
 import pl.owolny.identityprovider.domain.otp.OTP;
 import pl.owolny.identityprovider.domain.otp.OTPService;
@@ -75,15 +76,15 @@ public class LinkAccountsController {
                              @SessionAttribute String userEmail,
                              @SessionAttribute FederatedAuth federatedAuth,
                              @RequestParam String code,
-                             Model model) {
+                             RedirectAttributes redirectAttributes) {
         if (this.otpService.isVerifyAttemptsLimitExceeded(userEmail)) {
             return "redirect:/login?error=otp_verify_limit_exceeded";
         }
         if (this.otpService.isVerified(userEmail, code)) {
             removeSessionAttributes(request);
             createFederatedIdentityAccount(userId, federatedAuth);
-            model.addAttribute("success", "Your account has been successfully linked. You can now log in using your federated account.");
-            return LOGIN_VIEW;
+            redirectAttributes.addFlashAttribute("success", "Your account has been successfully linked. You can now log in using your federated account.");
+            return "redirect:/" + LOGIN_VIEW;
         }
         return "link-accounts-code";
     }

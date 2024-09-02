@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<configuration>
+
+    <springProperty scope="context" name="appName" source="spring.application.name"/>
+    <springProperty scope="context" name="lokiurl" source="loki.url.push"/>
+
+    <include resource="org/springframework/boot/logging/logback/defaults.xml"/>
+    <include resource="org/springframework/boot/logging/logback/console-appender.xml" />
+
+    <appender name="CONSOLE" class="ch.qos.logback.core.ConsoleAppender">
+        <encoder>
+            <pattern>%highlight(%-5level) %cyan(%logger{15}) -- %msg %n</pattern>
+        </encoder>
+    </appender>
+
+    <appender name="LOKI" class="com.github.loki4j.logback.Loki4jAppender">
+        <batchTimeoutMs>10000</batchTimeoutMs>
+        <maxRetryBackoffMs>10000</maxRetryBackoffMs>
+        <http>
+            <url>${lokiurl}</url>
+        </http>
+        <format>
+            <label>
+                <pattern>application=${appName},host=${HOSTNAME},level=%level</pattern>
+            </label>
+            <message>
+                <pattern>%highlight(%-5level) %cyan(%logger{15}) - %msg %n</pattern>
+            </message>
+            <sortByTime>true</sortByTime>
+        </format>
+    </appender>
+
+    <springProfile name="docker">
+        <root level="DEBUG">
+            <appender-ref ref="LOKI" />
+        </root>
+    </springProfile>
+
+    <root level="INFO">
+        <appender-ref ref="CONSOLE" />
+    </root>
+<!--    <logger name="org.springframework.web" level="DEBUG"/>-->
+</configuration>

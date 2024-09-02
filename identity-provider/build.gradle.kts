@@ -18,7 +18,6 @@ dependencies {
     implementation("org.springframework.boot:spring-boot-starter-data-redis")
     runtimeOnly("org.postgresql:postgresql")
 
-
     // Gatling
     gatlingImplementation("com.google.guava:guava:33.1.0-jre")
     gatlingImplementation("org.apache.commons:commons-lang3:3.14.0")

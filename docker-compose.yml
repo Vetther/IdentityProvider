@@ -104,7 +104,7 @@ services:
   #        -Xshareclasses:bootClassesOnly,nonFatal,silent
 
   identity-provider:
-    image: "vetther/apps-identity-provider"
+    image: "vetther/kierowca2.0-identity-provider"
     ports:
       - "9000:9000"
       - "9010:9010"
