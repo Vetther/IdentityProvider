@@ -42,7 +42,8 @@ bin/
 ### ENV ###
 **/env.properties
 
-/apps/docker/grafana/var
-/apps/docker/rabbitmq/rabbit-data
-/apps/docker/tempo/tempo-data
-/apps/docker/redis/redis-data
+### Docker ###
+/docker/grafana/var
+/docker/rabbitmq/rabbit-data
+/docker/tempo/tempo-data
+/docker/redis/redis-data
