@@ -61,6 +61,7 @@ subprojects {
     tasks.withType<BootBuildImage> {
         imageName = "vetther/${rootProject.name}-${project.name}"
 
+        environment.put("SPRING_PROFILES_ACTIVE", "cds")
         environment.put("BP_JVM_CDS_ENABLED", "true")
         environment.put("BP_SPRING_AOT_ENABLED", "true")
 
