@@ -63,7 +63,7 @@ services:
       - backend
 
   discovery-server:
-    image: "vetther/kierowca2.0-discovery-server"
+    image: "vetther/idp-discovery-server"
     ports:
       - "8761:8761"
     environment:
@@ -81,7 +81,7 @@ services:
       - backend
 
   identity-provider:
-    image: "vetther/kierowca2.0-identity-provider"
+    image: "vetther/idp-identity-provider"
     ports:
       - "9000:9000"
       - "9010:9010"
@@ -109,7 +109,7 @@ services:
           cpus: '2'
 
   mail-service:
-    image: "vetther/kierowca2.0-mail-service"
+    image: "vetther/idp-mail-service"
     ports:
       - "8082:8082"
     environment:

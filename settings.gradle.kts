@@ -1,4 +1,4 @@
-rootProject.name = "kierowca2.0"
+rootProject.name = "idp"
 
 include("identity-provider")
 include("discovery-server")
